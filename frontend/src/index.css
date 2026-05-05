@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-white antialiased min-h-screen selection:bg-primary/30;
+    background-color: #0f172a;
+  }
+}
+
+/* ── Mesh Gradient Blobs ── */
+@keyframes blob-float {
+  0%   { transform: translate(0, 0)    scale(1);    }
+  33%  { transform: translate(30px, -20px) scale(1.07); }
+  66%  { transform: translate(-20px, 15px) scale(0.96); }
+  100% { transform: translate(0, 0)    scale(1);    }
+}
+
+.mesh-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -2;
+  background: #0f172a;
+}
+
+.mesh-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(100px);
+  opacity: 0.5;
+  animation: blob-float 12s ease-in-out infinite;
+}
+
+/* ── Data Particles ── */
+@keyframes particle-rise {
+  0%   { transform: translateY(100vh); opacity: 0;   }
+  8%   { opacity: 0.6;                               }
+  92%  { opacity: 0.6;                               }
+  100% { transform: translateY(-10vh); opacity: 0;  }
+}
+
+.particles-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.particle {
+  position: absolute;
+  background: #38bdf8;
+  border-radius: 9999px;
+  animation: particle-rise linear infinite;
+}
+
+@layer components {
+  /* Glass panel - clean without spotlight */
+  .glass-panel {
+    @apply bg-surface backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl relative overflow-hidden;
+  }
+
+  .glass-input {
+    @apply bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all;
+    color-scheme: dark;
+  }
+
+  .glass-button {
+    @apply bg-primary/80 hover:bg-primary text-white font-semibold py-2 px-6 rounded-lg shadow-lg shadow-primary/20 backdrop-blur-sm transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track  { background: rgba(15,23,42,0.5); }
+::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
