@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: 'https://simulation-api-seven.vercel.app'
 });
 
 export const runSimulation = async (params) => {
