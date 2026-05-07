@@ -232,7 +232,21 @@ def api_profit_vs_q(req: SimulationParams):
             "sim_profit": clean_dict(kpis)["avg_profit"]
         })
         
-    return results
+    # Find optimal Q
+    max_profit = -float('inf')
+    optimal_q = None
+    for res in results:
+        if res["sim_profit"] > max_profit:
+            max_profit = res["sim_profit"]
+            optimal_q = res["Q"]
+            
+    for res in results:
+        res["is_optimal"] = (res["Q"] == optimal_q)
+        
+    return {
+        "optimal_q": optimal_q,
+        "data": results
+    }
 
 @app.post("/sensitivity-rq")
 def api_sensitivity_rq(req: SimulationParams):
