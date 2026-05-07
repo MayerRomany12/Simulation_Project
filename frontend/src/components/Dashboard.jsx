@@ -564,6 +564,7 @@ export default function Dashboard() {
                                   <YAxis stroke="rgba(255,255,255,0.5)" tick={{ fill: 'rgba(255,255,255,0.5)' }} domain={['auto', 'auto']} />
                                   <RechartsTooltip
                                     contentStyle={{ backgroundColor: 'rgba(15,23,42,0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#fff' }}
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                                   />
                                   <Bar dataKey="sim_profit" name="Simulated Profit" radius={[4, 4, 0, 0]}>
