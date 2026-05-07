@@ -262,7 +262,7 @@ const TooltipLabel = ({ label, tooltip }) => (
   <div className="flex items-start gap-1 group relative mb-1">
     <label className="text-xs text-white/60 block flex-1 break-words leading-tight">{label}</label>
     <Info size={12} className="text-white/40 cursor-help mt-[2px] shrink-0" />
-    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-52 p-2 bg-slate-800 text-sm text-white rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] border border-white/10 whitespace-normal break-words text-center">
+    <div className="absolute bottom-full mb-2 left-0 w-48 p-2 bg-slate-800 text-xs text-white rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] border border-white/10 whitespace-normal break-words">
       {tooltip}
     </div>
   </div>
