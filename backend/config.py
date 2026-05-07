@@ -77,7 +77,7 @@ SUB_RATE: float = 0.15    # fraction of stockouts that switch to the other produ
 
 # Cost extras
 DISPOSAL_COST: float = 1.0    # cost per expired unit (EGP)
-HOLDING_COST:  float = 0.0    # per-unit per-day holding cost (0 = no holding cost)
+HOLDING_COST:  float = 0.5    # per-unit per-day holding cost (0 = no holding cost)
 
 # Simulation horizon
 SIM_DAYS:    int = 365    # measurement period (after warm-up)

@@ -166,6 +166,8 @@ def summarise(df):
     result['turnover_b']    = round(total_sales_b / max(avg_inv_b * n, 1), 4)
     result['waste_pct_a']   = round(total_exp_a / max(total_sales_a, 1) * 100, 4)
     result['waste_pct_b']   = round(total_exp_b / max(total_sales_b, 1) * 100, 4)
+    result['avg_order_a']   = round(df['order_a'].mean(), 4) if 'order_a' in df.columns else 0.0
+    result['avg_order_b']   = round(df['order_b'].mean(), 4) if 'order_b' in df.columns else 0.0
     result['n_days']        = n
 
     return result

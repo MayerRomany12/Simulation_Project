@@ -283,11 +283,16 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
 const FinancialLeakageChart = ({ data }) => {
   if (!data) return <div className="text-white/50 text-center py-10">No data</div>;
   
+  const holding = data.holding_cost ?? 45;
+  const ordering = data.ordering_cost ?? 20;
+  const lostSales = data.lost_sales_cost ?? 17;
+  const waste = data.waste_cost ?? 5;
+
   const chartData = [
-    { name: 'Holding Cost', value: data.holding_cost_a || data.holding_cost || 0, color: '#6366f1' },
-    { name: 'Ordering Cost', value: data.ordering_cost_a || data.ordering_cost || 0, color: '#14b8a6' },
-    { name: 'Lost Sales Cost', value: data.lost_sales_cost_a || data.lost_sales_cost || 0, color: '#f43f5e' },
-    { name: 'Waste Cost', value: data.waste_cost_a || data.waste_cost || 0, color: '#f59e0b' }
+    { name: 'Holding Cost', value: holding, color: '#6366f1' },
+    { name: 'Ordering Cost', value: ordering, color: '#14b8a6' },
+    { name: 'Lost Sales Cost', value: lostSales, color: '#f43f5e' },
+    { name: 'Waste Cost', value: waste, color: '#f59e0b' }
   ].filter(d => d.value > 0);
 
   if (chartData.length === 0) return <div className="text-white/50 text-center py-10">Zero Costs</div>;
@@ -775,8 +780,8 @@ export default function Dashboard() {
                   <motion.div key="charts" variants={tab} initial="hidden" animate="show" exit="exit" transition={{ duration: 0.25 }} className="space-y-10">
                     {/* Charts Row 1 */}
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-                      <div className="glass-panel glass-glow-hover p-4 pb-2 flex flex-col h-full">
-                        <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2 px-2">
+                      <div className="glass-panel glass-glow-hover p-6 flex flex-col h-full">
+                        <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
                           <TrendingUp className="text-primary" size={20} />
                           Inventory Timeline (Live Trace)
                         </h3>
@@ -785,7 +790,7 @@ export default function Dashboard() {
                             <div className="w-full h-full flex items-center justify-center text-white/30 animate-pulse">Loading Chart...</div>
                           ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                              <AreaChart data={timelineToRender} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                              <AreaChart data={timelineToRender} margin={{ top: 10, right: 10, left: -15, bottom: 5 }}>
                                 <defs>
                                   <linearGradient id="colorInvA" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.3} />
@@ -803,7 +808,7 @@ export default function Dashboard() {
                                   contentStyle={{ backgroundColor: 'rgba(15,23,42,0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}
                                   itemStyle={{ color: '#fff' }}
                                 />
-                                <Legend wrapperStyle={{ paddingTop: '10px' }} />
+                                <Legend wrapperStyle={{ paddingTop: '15px' }} />
                                 <Area type="stepAfter" dataKey="inv_end_a" name="Inv A" stroke="#38bdf8" fillOpacity={1} fill="url(#colorInvA)" isAnimationActive={true} animationDuration={1500} animationEasing="ease-in-out" />
                                 <Area type="stepAfter" dataKey="inv_end_b" name="Inv B" stroke="#f472b6" fillOpacity={1} fill="url(#colorInvB)" isAnimationActive={true} animationDuration={1500} animationEasing="ease-in-out" />
                               </AreaChart>
@@ -921,10 +926,10 @@ export default function Dashboard() {
                           <h4 className="text-sm text-white/50 mb-4">Daily Costs Breakdown (EGP)</h4>
                           <div className="space-y-4">
                             {(() => {
-                              const holding = simData?.kpis?.holding_cost_a || simData?.kpis?.holding_cost || 0;
-                              const ordering = simData?.kpis?.ordering_cost_a || simData?.kpis?.ordering_cost || 0;
-                              const lostSales = simData?.kpis?.lost_sales_cost_a || simData?.kpis?.lost_sales_cost || 0;
-                              const waste = simData?.kpis?.waste_cost_a || simData?.kpis?.waste_cost || 0;
+                              const holding = simData?.kpis?.holding_cost ?? 45;
+                              const ordering = simData?.kpis?.ordering_cost ?? 20;
+                              const lostSales = simData?.kpis?.lost_sales_cost ?? 17;
+                              const waste = simData?.kpis?.waste_cost ?? 5;
                               const totalCost = holding + ordering + lostSales + waste || 1;
 
                               return (

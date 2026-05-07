@@ -180,6 +180,10 @@ def api_run_simulation(req: SimulationParams):
     avg_kpis['lost_sales_cost'] = (avg_kpis.get('avg_lost_a', 0) + avg_kpis.get('avg_lost_b', 0)) * margin
     avg_kpis['waste_cost'] = (avg_kpis.get('avg_expired_a', 0) + avg_kpis.get('avg_expired_b', 0)) * params['c']
     
+    # Calculate Holding and Ordering Costs
+    avg_kpis['holding_cost'] = (avg_kpis.get('avg_inv_a', 0) + avg_kpis.get('avg_inv_b', 0)) * params.get('holding_cost', 0.5)
+    avg_kpis['ordering_cost'] = (avg_kpis.get('avg_order_a', 0) + avg_kpis.get('avg_order_b', 0)) * params['c']
+    
     insights = generate_insights(avg_kpis, params)
     
     # Replace NaN/Infinity
