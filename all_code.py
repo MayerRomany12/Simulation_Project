@@ -6,7 +6,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # ── Central configuration ─────────────────────────────────────────────────
-from config import (
+from backend.config import (
     GLOBAL_SEED,
     P, C, S, PI, MU, SIGMA,
     N_DAYS, Q_VALUES,

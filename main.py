@@ -26,14 +26,14 @@ matplotlib.use('Agg')          # non-interactive backend; caller can override
 import matplotlib.pyplot as plt
 
 # -- Modular library ----------------------------------------------------------
-from config import (
+from backend.config import (
     GLOBAL_SEED, BASE_PARAMS,
     Q_A, Q_B, R_A, R_B,
     SIM_DAYS, WARMUP_DAYS,
     Q_VALUES, N_DAYS, P, C, S, PI, MU, SIGMA,
 )
-from demand import build_demand_series
-from simulation import (
+from backend.demand import build_demand_series
+from backend.simulation import (
     run_multi_period_simulation,
     run_baseline_newsvendor_sim,
     run_stress_test,
@@ -42,7 +42,7 @@ from simulation import (
     compute_reorder_point,
     summarise,
 )
-from visualization import (
+from backend.visualization import (
     plot_profit_vs_Q,
     plot_convergence,
     plot_demand_histogram,

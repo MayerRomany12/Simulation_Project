@@ -9,8 +9,8 @@ from pydantic import BaseModel, Field
 import numpy as np
 import pandas as pd
 
-from config import BASE_PARAMS, GLOBAL_SEED, Q_A, Q_B, R_A, R_B, SIM_DAYS, WARMUP_DAYS, Q_VALUES, N_DAYS
-from simulation import (
+from backend.config import BASE_PARAMS, GLOBAL_SEED, Q_A, Q_B, R_A, R_B, SIM_DAYS, WARMUP_DAYS, Q_VALUES, N_DAYS
+from backend.simulation import (
     run_multi_period_simulation,
     summarise,
     run_stress_test,
@@ -207,10 +207,8 @@ def api_profit_vs_q(req: SimulationParams):
     params = get_base_params(req)
     seed_seq = np.random.SeedSequence(req.seed + 1)
     
-    # Using Q_VALUES from config for the analytical comparison, or generating a wider range based on user's mu
-    # Let's generate a range around mu
-    base_Q = int(req.mu_a)
-    q_vals = list(range(max(10, base_Q - 30), base_Q + 40, 5))
+    # Use fixed expanded range to show full diminishing returns curve
+    q_vals = list(range(20, 405, 5))
     
     nv_df = run_baseline_newsvendor_sim(
         params, q_vals, n_days=N_DAYS, seed_seq=seed_seq

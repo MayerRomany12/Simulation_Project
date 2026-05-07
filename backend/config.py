@@ -54,8 +54,8 @@ MU_B:    float = 55.0
 SIGMA_B: float = 12.0
 
 # Shared demand model bounds
-CLIP_LOW:  int = 20
-CLIP_HIGH: int = 300
+CLIP_LOW:  int = 5
+CLIP_HIGH: int = 500
 
 # Seasonality
 WEEKEND_MULT: float = 1.0    # 1.0 = no weekend effect; 1.2–1.3 = weekend boost

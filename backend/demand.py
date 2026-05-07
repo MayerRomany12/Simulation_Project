@@ -37,7 +37,7 @@ value of ``start_dow`` in [0, 6].
 import numpy as np
 
 
-def generate_demand(n, mu, sigma, clip_low=20, clip_high=300, rng=None):
+def generate_demand(n, mu, sigma, clip_low=5, clip_high=500, rng=None):
     """
     Generate n daily demand values from N(mu, sigma).
 
@@ -81,7 +81,7 @@ def apply_seasonality(demands, start_dow=0, weekend_mult=1.2):
     return np.clip(np.round(demands * multiplier), 1, None).astype(int)
 
 
-def build_demand_series(n, mu, sigma, clip_low=20, clip_high=300,
+def build_demand_series(n, mu, sigma, clip_low=5, clip_high=500,
                         weekend_mult=1.0, start_dow=0, rng=None):
     """
     Generate demand and apply seasonality in one call.

@@ -4,7 +4,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   BarChart, Bar, Legend, Cell
 } from 'recharts';
-import { Activity, DollarSign, Package, AlertTriangle, TrendingUp, RefreshCw, Download, List, BarChart2, Play, Square, Settings } from 'lucide-react';
+import { Activity, DollarSign, Package, AlertTriangle, TrendingUp, RefreshCw, Download, List, BarChart2, Play, Square, Settings, Info } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence, animate } from 'framer-motion';
@@ -99,14 +99,27 @@ const Heatmap = ({ data }) => {
   );
 };
 
+
+const TooltipLabel = ({ label, tooltip }) => (
+  <div className="flex items-center gap-1 group relative mb-1">
+    <label className="text-xs text-white/60 block">{label}</label>
+    <Info size={12} className="text-white/40 cursor-help" />
+    <div className="absolute left-0 bottom-full mb-2 w-48 p-2 bg-slate-800 text-xs text-white rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 border border-white/10">
+      {tooltip}
+    </div>
+  </div>
+);
+
 export default function Dashboard() {
   const [params, setParams] = useState({
     mu_a: 60, sigma_a: 15, mu_b: 55, sigma_b: 12,
-    p: 25, c: 10, s: 2, pi: 3,
+    p: 10, c: 5, s: 2, pi: 3,
     Q_a: 200, Q_b: 180, R_a: 230, R_b: 200,
     lead_time: 3, expiry_k: 30, sub_rate: 0.15,
     n_days: 365, seed: 42
   });
+  
+  const [validationError, setValidationError] = useState('');
 
   const [serviceLevelTarget, setServiceLevelTarget] = useState(0.95);
 
@@ -126,7 +139,28 @@ export default function Dashboard() {
 
   const dashboardRef = useRef(null);
 
+  const validateParams = () => {
+    const demandParams = ['mu_a', 'sigma_a', 'mu_b', 'sigma_b'];
+    for (const p of demandParams) {
+      if (params[p] < 5 || params[p] > 500) {
+        return `Demand parameter ${p} must be between 5 and 500.`;
+      }
+    }
+    if (params.sigma_a > params.mu_a) return "Product A: Std Dev (σ) cannot exceed Mean (μ).";
+    if (params.sigma_b > params.mu_b) return "Product B: Std Dev (σ) cannot exceed Mean (μ).";
+    for (const [key, value] of Object.entries(params)) {
+      if (value === '' || value === null || isNaN(value)) return `Parameter ${key} is required.`;
+    }
+    return '';
+  };
+
   const fetchAll = async () => {
+    const error = validateParams();
+    if (error) {
+      setValidationError(error);
+      return;
+    }
+    setValidationError('');
     setLoading(true);
     setIsTracing(false);
     try {
@@ -149,9 +183,7 @@ export default function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
+
 
   useEffect(() => {
     let interval;
@@ -287,7 +319,7 @@ export default function Dashboard() {
             <h3 className="text-sm text-primary font-semibold uppercase tracking-wider">Simulation Setting</h3>
             <div className="grid grid-cols-1 gap-4 mb-4">
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Simulation Horizon (Days)</label>
+                <TooltipLabel label="Simulation Horizon (Days)" tooltip="Number of days to simulate." />
                 <input type="number" name="n_days" min="100" max="30000" value={params.n_days} onChange={handleParamChange} className="glass-input w-full" />
               </div>
             </div>
@@ -295,11 +327,11 @@ export default function Dashboard() {
             <h3 className="text-sm text-primary font-semibold uppercase tracking-wider">Demand (Product A)</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Mean (μ)</label>
+                <TooltipLabel label="Mean Daily Demand (μ)" tooltip="Average number of units sold per day. (Min: 5, Max: 500)" />
                 <input type="number" name="mu_a" value={params.mu_a} onChange={handleParamChange} className="glass-input w-full" />
               </div>
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Std Dev (σ)</label>
+                <TooltipLabel label="Standard Deviation (σ)" tooltip="Daily demand volatility. Cannot exceed Mean. (Min: 5, Max: 500)" />
                 <input type="number" name="sigma_a" value={params.sigma_a} onChange={handleParamChange} className="glass-input w-full" />
               </div>
             </div>
@@ -307,11 +339,11 @@ export default function Dashboard() {
             <h3 className="text-sm text-primary font-semibold uppercase tracking-wider mt-6">Inventory Policy (A)</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Order Qty (Q)</label>
+                <TooltipLabel label="Order Quantity (Q)" tooltip="Number of units ordered when inventory drops." />
                 <input type="number" name="Q_a" value={params.Q_a} onChange={handleParamChange} className="glass-input w-full" />
               </div>
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Reorder Pt (R)</label>
+                <TooltipLabel label="Reorder Point (R)" tooltip="Inventory level that triggers a new order." />
                 <input type="number" name="R_a" value={params.R_a} onChange={handleParamChange} className="glass-input w-full" />
               </div>
             </div>
@@ -334,11 +366,11 @@ export default function Dashboard() {
             <h3 className="text-sm text-primary font-semibold uppercase tracking-wider mt-6">Supply & Constraints</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Lead Time (Days)</label>
+                <TooltipLabel label="Lead Time (Days)" tooltip="Days between order placement and receipt." />
                 <input type="number" name="lead_time" value={params.lead_time} onChange={handleParamChange} className="glass-input w-full" />
               </div>
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Expiry Limit (Days)</label>
+                <TooltipLabel label="Expiry Limit (Days)" tooltip="Shelf life of the product." />
                 <input type="number" name="expiry_k" value={params.expiry_k} onChange={handleParamChange} className="glass-input w-full" />
               </div>
             </div>
@@ -346,15 +378,21 @@ export default function Dashboard() {
             <h3 className="text-sm text-primary font-semibold uppercase tracking-wider mt-6">Economics (EGP)</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Price</label>
+                <TooltipLabel label="Selling Price" tooltip="Retail selling price per unit (EGP)." />
                 <input type="number" name="p" value={params.p} onChange={handleParamChange} className="glass-input w-full" />
               </div>
               <div>
-                <label className="text-xs text-white/60 mb-1 block">Cost</label>
+                <TooltipLabel label="Unit Cost" tooltip="Wholesale cost per unit (EGP)." />
                 <input type="number" name="c" value={params.c} onChange={handleParamChange} className="glass-input w-full" />
               </div>
             </div>
           </div>
+
+          {validationError && (
+            <div className="mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-xs text-red-200">
+              {validationError}
+            </div>
+          )}
 
           <button type="submit" disabled={loading} className="glass-button w-full mt-6 flex items-center justify-center gap-2 font-bold py-3">
             {loading ? <RefreshCw className="animate-spin" size={18} /> : <Activity size={18} />}
@@ -365,7 +403,19 @@ export default function Dashboard() {
 
         {/* Main Content Area */}
         <motion.div variants={item} className="flex-1 space-y-10" ref={dashboardRef}>
-
+        
+        {(!simData && !loading) ? (
+          <div className="h-full min-h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
+            <div className="p-6 bg-primary/10 rounded-full animate-pulse">
+              <Play size={48} className="text-primary/70 ml-2" />
+            </div>
+            <h2 className="text-3xl font-bold text-white">System Ready</h2>
+            <p className="text-white/60 max-w-md">
+              Adjust your pharmacy parameters in the sidebar and click "Run Simulation" to generate insights.
+            </p>
+          </div>
+        ) : (
+          <>
         {/* Header Tab & Action Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/5 p-2 rounded-xl backdrop-blur-md border border-white/10">
           <div className="flex space-x-2">
@@ -379,7 +429,7 @@ export default function Dashboard() {
               onClick={() => setActiveTab('log')}
               className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all ${activeTab === 'log' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
             >
-              <List size={16} /> Transaction Log
+              <List size={16} /> Simulation Table
             </button>
           </div>
 
@@ -570,7 +620,7 @@ export default function Dashboard() {
         ) : (
           <motion.div key="log" variants={tab} initial="hidden" animate="show" exit="exit" transition={{ duration: 0.25 }} className="glass-panel p-6">
             <h3 className="text-lg font-bold mb-4 text-white flex items-center justify-between">
-              <div className="flex items-center gap-2"><List className="text-secondary" size={20} /> Transaction Log</div>
+              <div className="flex items-center gap-2"><List className="text-secondary" size={20} /> Simulation Table</div>
               <div className="flex items-center gap-2 text-sm">
                 <button disabled={logPage === 1} onClick={() => setLogPage(p => p - 1)} className="px-3 py-1 bg-white/10 rounded disabled:opacity-30">Prev</button>
                 <span className="text-white/60">Page {logPage} of {totalPages}</span>
@@ -609,7 +659,8 @@ export default function Dashboard() {
           </motion.div>
         )}
         </AnimatePresence>
-
+          </>
+        )}
         </motion.div>
       </motion.div>
     </div>
