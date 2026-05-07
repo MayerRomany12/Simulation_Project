@@ -208,7 +208,7 @@ def api_profit_vs_q(req: SimulationParams):
     seed_seq = np.random.SeedSequence(req.seed + 1)
     
     # Use fixed expanded range to show full diminishing returns curve
-    q_vals = list(range(20, 405, 5))
+    q_vals = list(range(20, 305, 5))
     
     nv_df = run_baseline_newsvendor_sim(
         params, q_vals, n_days=N_DAYS, seed_seq=seed_seq

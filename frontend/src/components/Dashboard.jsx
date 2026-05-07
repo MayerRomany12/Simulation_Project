@@ -120,6 +120,7 @@ export default function Dashboard() {
   });
   
   const [validationError, setValidationError] = useState('');
+  const [errors, setErrors] = useState({});
 
   const [serviceLevelTarget, setServiceLevelTarget] = useState(0.95);
 
@@ -133,25 +134,42 @@ export default function Dashboard() {
   const [logPage, setLogPage] = useState(1);
   const rowsPerPage = 50;
 
-  const [traceSpeed, setTraceSpeed] = useState(50);
+  const [traceSpeed, setTraceSpeed] = useState(80);
   const [isTracing, setIsTracing] = useState(false);
   const [traceDay, setTraceDay] = useState(365);
 
   const dashboardRef = useRef(null);
 
   const validateParams = () => {
-    const demandParams = ['mu_a', 'sigma_a', 'mu_b', 'sigma_b'];
-    for (const p of demandParams) {
-      if (params[p] < 5 || params[p] > 500) {
-        return `Demand parameter ${p} must be between 5 and 500.`;
+    const newErrors = {};
+    const checkDemand = (val, name) => {
+      if (val < 5 || val > 500) newErrors[name] = "Must be between 5 and 500.";
+    };
+    checkDemand(params.mu_a, 'mu_a');
+    checkDemand(params.sigma_a, 'sigma_a');
+    
+    if (params.sigma_a > params.mu_a) newErrors.sigma_a = "Cannot exceed Mean (μ).";
+
+    if (params.p < 5 || params.p > 10000) newErrors.p = "Must be between 5 and 10000.";
+    if (params.c < 5 || params.c > 10000) newErrors.c = "Must be between 5 and 10000.";
+    if (params.c >= params.p) newErrors.c = "Must be strictly less than Price.";
+
+    if (params.lead_time < 1 || params.lead_time > 60) newErrors.lead_time = "Must be between 1 and 60.";
+    if (params.expiry_k < 10 || params.expiry_k > 1200) newErrors.expiry_k = "Must be between 10 and 1200.";
+
+    if (params.Q_a < 10 || params.Q_a > 10000) newErrors.Q_a = "Must be between 10 and 10000.";
+    if (params.R_a < 10 || params.R_a > 10000) newErrors.R_a = "Must be between 10 and 10000.";
+
+    if (serviceLevelTarget <= 0 || serviceLevelTarget >= 1) newErrors.serviceLevelTarget = "Must be strictly between 0 and 1.";
+
+    for (const [key, value] of Object.entries(params)) {
+      if (value === '' || value === null || isNaN(value)) {
+        if (!newErrors[key]) newErrors[key] = "Required.";
       }
     }
-    if (params.sigma_a > params.mu_a) return "Product A: Std Dev (σ) cannot exceed Mean (μ).";
-    if (params.sigma_b > params.mu_b) return "Product B: Std Dev (σ) cannot exceed Mean (μ).";
-    for (const [key, value] of Object.entries(params)) {
-      if (value === '' || value === null || isNaN(value)) return `Parameter ${key} is required.`;
-    }
-    return '';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0 ? '' : 'Please fix the errors below.';
   };
 
   const fetchAll = async () => {
@@ -303,7 +321,7 @@ export default function Dashboard() {
 
       <motion.div variants={page} initial="hidden" animate="show" className="flex flex-col lg:flex-row gap-12 relative p-4 lg:p-6">
         {/* Sidebar */}
-        <motion.div variants={item} className="w-full lg:w-80 flex-shrink-0">
+        <motion.div variants={item} className="w-full lg:w-80 shrink-0">
           <form onSubmit={handleSubmit} className="glass-panel p-6 sticky top-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -315,12 +333,13 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="space-y-4 max-h-[75vh] overflow-y-auto overflow-x-hidden pb-24 pr-2 custom-scrollbar">
             <h3 className="text-sm text-primary font-semibold uppercase tracking-wider">Simulation Setting</h3>
             <div className="grid grid-cols-1 gap-4 mb-4">
               <div>
                 <TooltipLabel label="Simulation Horizon (Days)" tooltip="Number of days to simulate." />
                 <input type="number" name="n_days" min="100" max="30000" value={params.n_days} onChange={handleParamChange} className="glass-input w-full" />
+                {errors.n_days && <p className="text-red-400 text-xs mt-1">{errors.n_days}</p>}
               </div>
             </div>
 
@@ -329,10 +348,12 @@ export default function Dashboard() {
               <div>
                 <TooltipLabel label="Mean Daily Demand (μ)" tooltip="Average number of units sold per day. (Min: 5, Max: 500)" />
                 <input type="number" name="mu_a" value={params.mu_a} onChange={handleParamChange} className="glass-input w-full" />
+                {errors.mu_a && <p className="text-red-400 text-xs mt-1">{errors.mu_a}</p>}
               </div>
               <div>
                 <TooltipLabel label="Standard Deviation (σ)" tooltip="Daily demand volatility. Cannot exceed Mean. (Min: 5, Max: 500)" />
                 <input type="number" name="sigma_a" value={params.sigma_a} onChange={handleParamChange} className="glass-input w-full" />
+                {errors.sigma_a && <p className="text-red-400 text-xs mt-1">{errors.sigma_a}</p>}
               </div>
             </div>
 
@@ -341,10 +362,12 @@ export default function Dashboard() {
               <div>
                 <TooltipLabel label="Order Quantity (Q)" tooltip="Number of units ordered when inventory drops." />
                 <input type="number" name="Q_a" value={params.Q_a} onChange={handleParamChange} className="glass-input w-full" />
+                {errors.Q_a && <p className="text-red-400 text-xs mt-1">{errors.Q_a}</p>}
               </div>
               <div>
                 <TooltipLabel label="Reorder Point (R)" tooltip="Inventory level that triggers a new order." />
                 <input type="number" name="R_a" value={params.R_a} onChange={handleParamChange} className="glass-input w-full" />
+                {errors.R_a && <p className="text-red-400 text-xs mt-1">{errors.R_a}</p>}
               </div>
             </div>
 
@@ -356,6 +379,7 @@ export default function Dashboard() {
                     <input type="number" step="0.01" value={serviceLevelTarget} onChange={(e) => setServiceLevelTarget(parseFloat(e.target.value))} className="glass-input w-full text-sm py-1 px-2" placeholder="e.g. 0.95" />
                     <span className="ml-2 text-xs text-white/50">Target SL</span>
                   </div>
+                  {errors.serviceLevelTarget && <p className="text-red-400 text-xs mt-1">{errors.serviceLevelTarget}</p>}
                 </div>
                 <button type="button" onClick={handleSuggestR} className="bg-primary/80 hover:bg-primary text-white text-xs px-3 py-1 rounded transition-colors font-medium">
                   Suggest R
@@ -368,10 +392,12 @@ export default function Dashboard() {
               <div>
                 <TooltipLabel label="Lead Time (Days)" tooltip="Days between order placement and receipt." />
                 <input type="number" name="lead_time" value={params.lead_time} onChange={handleParamChange} className="glass-input w-full" />
+                {errors.lead_time && <p className="text-red-400 text-xs mt-1">{errors.lead_time}</p>}
               </div>
               <div>
                 <TooltipLabel label="Expiry Limit (Days)" tooltip="Shelf life of the product." />
                 <input type="number" name="expiry_k" value={params.expiry_k} onChange={handleParamChange} className="glass-input w-full" />
+                {errors.expiry_k && <p className="text-red-400 text-xs mt-1">{errors.expiry_k}</p>}
               </div>
             </div>
 
@@ -380,10 +406,12 @@ export default function Dashboard() {
               <div>
                 <TooltipLabel label="Selling Price" tooltip="Retail selling price per unit (EGP)." />
                 <input type="number" name="p" value={params.p} onChange={handleParamChange} className="glass-input w-full" />
+                {errors.p && <p className="text-red-400 text-xs mt-1">{errors.p}</p>}
               </div>
               <div>
                 <TooltipLabel label="Unit Cost" tooltip="Wholesale cost per unit (EGP)." />
                 <input type="number" name="c" value={params.c} onChange={handleParamChange} className="glass-input w-full" />
+                {errors.c && <p className="text-red-400 text-xs mt-1">{errors.c}</p>}
               </div>
             </div>
           </div>
