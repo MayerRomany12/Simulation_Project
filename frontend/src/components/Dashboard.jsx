@@ -346,7 +346,8 @@ export default function Dashboard() {
     p: 10, c: 5, s: 2, pi: 3,
     Q_a: 200, Q_b: 180, R_a: 230, R_b: 200,
     lead_time: 3, expiry_k: 30, sub_rate: 0.15,
-    n_days: 365, seed: 42
+    n_days: 365, seed: 42,
+    holding_cost_yr: 2, fixed_order_cost: 50
   });
 
   const [validationError, setValidationError] = useState('');
@@ -389,6 +390,8 @@ export default function Dashboard() {
     if (params.p < 5 || params.p > 10000) newErrors.p = "Must be between 5 and 10000.";
     if (params.c < 5 || params.c > 10000) newErrors.c = "Must be between 5 and 10000.";
     if (params.c >= params.p) newErrors.c = "Must be strictly less than Price.";
+    if (params.holding_cost_yr < 0) newErrors.holding_cost_yr = "Cannot be negative.";
+    if (params.fixed_order_cost < 0) newErrors.fixed_order_cost = "Cannot be negative.";
 
     if (params.lead_time < 1 || params.lead_time > 60) newErrors.lead_time = "Must be between 1 and 60.";
     if (params.expiry_k < 10 || params.expiry_k > 1200) newErrors.expiry_k = "Must be between 10 and 1200.";
@@ -657,6 +660,20 @@ export default function Dashboard() {
                   <TooltipLabel align="right" label="Unit Cost" tooltip="Wholesale cost per unit (EGP)." />
                   <input type="number" name="c" value={params.c} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.c && <p className="text-red-400 text-xs mt-1">{errors.c}</p>}
+                  <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="relative group">
+                  <TooltipLabel label="Holding Cost / Unit / Year" tooltip="Cost to hold one unit in inventory for a full year." />
+                  <input type="number" name="holding_cost_yr" step="0.1" value={params.holding_cost_yr} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
+                  {errors.holding_cost_yr && <p className="text-red-400 text-xs mt-1">{errors.holding_cost_yr}</p>}
+                  <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
+                </div>
+                <div className="relative group">
+                  <TooltipLabel align="right" label="Fixed Order Cost" tooltip="Fixed administrative or shipping cost applied every time a new order is placed, regardless of quantity." />
+                  <input type="number" name="fixed_order_cost" value={params.fixed_order_cost} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
+                  {errors.fixed_order_cost && <p className="text-red-400 text-xs mt-1">{errors.fixed_order_cost}</p>}
                   <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
               </div>

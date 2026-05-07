@@ -168,6 +168,10 @@ def summarise(df):
     result['waste_pct_b']   = round(total_exp_b / max(total_sales_b, 1) * 100, 4)
     result['avg_order_a']   = round(df['order_a'].mean(), 4) if 'order_a' in df.columns else 0.0
     result['avg_order_b']   = round(df['order_b'].mean(), 4) if 'order_b' in df.columns else 0.0
+    result['avg_ordering_cost_a'] = round(df['setup_a'].mean(), 4) if 'setup_a' in df.columns else 0.0
+    result['avg_ordering_cost_b'] = round(df['setup_b'].mean(), 4) if 'setup_b' in df.columns else 0.0
+    result['avg_holding_cost_a'] = round(df['hc_a'].mean(), 4) if 'hc_a' in df.columns else 0.0
+    result['avg_holding_cost_b'] = round(df['hc_b'].mean(), 4) if 'hc_b' in df.columns else 0.0
     result['n_days']        = n
 
     return result

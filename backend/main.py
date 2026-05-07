@@ -37,13 +37,14 @@ class SimulationParams(BaseModel):
     clip_low: int = Field(default=BASE_PARAMS['clip_low'])
     clip_high: int = Field(default=BASE_PARAMS['clip_high'])
     weekend_mult: float = Field(default=BASE_PARAMS['weekend_mult'])
+    holding_cost_yr: float = Field(default=BASE_PARAMS.get('holding_cost_yr', 2.0))
+    fixed_order_cost: float = Field(default=BASE_PARAMS.get('fixed_order_cost', 50.0))
     # Economics
     p: float = Field(default=BASE_PARAMS['p'])
     c: float = Field(default=BASE_PARAMS['c'])
     s: float = Field(default=BASE_PARAMS['s'])
     pi: float = Field(default=BASE_PARAMS['pi'])
     disposal_cost: float = Field(default=BASE_PARAMS['disposal_cost'])
-    holding_cost: float = Field(default=BASE_PARAMS['holding_cost'])
     # Inventory Policies
     lead_time: int = Field(default=BASE_PARAMS['lead_time'])
     expiry_k: int = Field(default=BASE_PARAMS['expiry_k'])
@@ -65,7 +66,9 @@ def get_base_params(req: SimulationParams):
         'clip_low': req.clip_low, 'clip_high': req.clip_high,
         'weekend_mult': req.weekend_mult,
         'p': req.p, 'c': req.c, 's': req.s, 'pi': req.pi,
-        'disposal_cost': req.disposal_cost, 'holding_cost': req.holding_cost,
+        'disposal_cost': req.disposal_cost,
+        'holding_cost_yr': req.holding_cost_yr,
+        'fixed_order_cost': req.fixed_order_cost,
         'lead_time': req.lead_time, 'expiry_k': req.expiry_k, 'sub_rate': req.sub_rate
     }
 
@@ -180,9 +183,9 @@ def api_run_simulation(req: SimulationParams):
     avg_kpis['lost_sales_cost'] = (avg_kpis.get('avg_lost_a', 0) + avg_kpis.get('avg_lost_b', 0)) * margin
     avg_kpis['waste_cost'] = (avg_kpis.get('avg_expired_a', 0) + avg_kpis.get('avg_expired_b', 0)) * params['c']
     
-    # Calculate Holding and Ordering Costs
-    avg_kpis['holding_cost'] = (avg_kpis.get('avg_inv_a', 0) + avg_kpis.get('avg_inv_b', 0)) * params.get('holding_cost', 0.5)
-    avg_kpis['ordering_cost'] = (avg_kpis.get('avg_order_a', 0) + avg_kpis.get('avg_order_b', 0)) * params['c']
+    # Use exact daily averages computed from the simulation logic
+    avg_kpis['holding_cost'] = avg_kpis.get('avg_holding_cost_a', 0) + avg_kpis.get('avg_holding_cost_b', 0)
+    avg_kpis['ordering_cost'] = avg_kpis.get('avg_ordering_cost_a', 0) + avg_kpis.get('avg_ordering_cost_b', 0)
     
     insights = generate_insights(avg_kpis, params)
     

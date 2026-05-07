@@ -187,8 +187,9 @@ def simulate_one_day(inv_a, inv_b, pipeline_a, pipeline_b,
     dc  = params['disposal_cost']
     sr  = params['sub_rate']
     K   = params['expiry_k']
-    # holding_cost is optional; defaults to 0.0 so existing callers are unaffected
-    hc  = params.get('holding_cost', 0.0)
+    # holding_cost_yr is optional; defaults to 2.0 so existing callers are unaffected
+    hc  = params.get('holding_cost_yr', 2.0) / 365.0
+    foc = params.get('fixed_order_cost', 50.0)
 
     # 1. Receive arrivals
     recv_a = pipeline_a.advance()
@@ -231,22 +232,30 @@ def simulate_one_day(inv_a, inv_b, pipeline_a, pipeline_b,
     if order_b > 0:
         pipeline_b.place_order(order_b)
 
+    setup_a = foc if order_a > 0 else 0
+    setup_b = foc if order_b > 0 else 0
+
     # 7. Daily profit
     # Cost charged when order is placed; revenue when sold.
     # holding_cost applied to end-of-day on-hand inventory (after sales).
     inv_end_a = inv_a.on_hand
     inv_end_b = inv_b.on_hand
+    
+    hc_a = hc * inv_end_a
+    hc_b = hc * inv_end_b
 
     profit_a = (p * total_sold_a
                 - c * order_a
+                - setup_a
                 - pi * total_lost_a
                 - dc * expired_a
-                - hc * inv_end_a)          # holding cost (0.0 if not provided)
+                - hc_a)          # holding cost
     profit_b = (p * total_sold_b
                 - c * order_b
+                - setup_b
                 - pi * total_lost_b
                 - dc * expired_b
-                - hc * inv_end_b)          # holding cost (0.0 if not provided)
+                - hc_b)          # holding cost
 
     return dict(
         recv_a=recv_a,        recv_b=recv_b,
@@ -254,6 +263,8 @@ def simulate_one_day(inv_a, inv_b, pipeline_a, pipeline_b,
         sales_a=total_sold_a, sales_b=total_sold_b,
         lost_a=total_lost_a,  lost_b=total_lost_b,
         order_a=order_a,      order_b=order_b,
+        setup_a=setup_a,      setup_b=setup_b,
+        hc_a=hc_a,            hc_b=hc_b,
         profit_a=profit_a,    profit_b=profit_b,
         inv_end_a=inv_end_a,
         inv_end_b=inv_end_b,

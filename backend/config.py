@@ -77,7 +77,8 @@ SUB_RATE: float = 0.15    # fraction of stockouts that switch to the other produ
 
 # Cost extras
 DISPOSAL_COST: float = 1.0    # cost per expired unit (EGP)
-HOLDING_COST:  float = 0.5    # per-unit per-day holding cost (0 = no holding cost)
+HOLDING_COST_YR: float = 2.0  # cost to hold one unit for a full year
+FIXED_ORDER_COST: float = 50.0 # fixed setup/shipping cost per order
 
 # Simulation horizon
 SIM_DAYS:    int = 365    # measurement period (after warm-up)
@@ -102,7 +103,8 @@ BASE_PARAMS: dict = dict(
     s           = S,
     pi          = PI,
     disposal_cost = DISPOSAL_COST,
-    holding_cost  = HOLDING_COST,
+    holding_cost_yr = HOLDING_COST_YR,
+    fixed_order_cost = FIXED_ORDER_COST,
     # Inventory
     lead_time   = LEAD_TIME,
     expiry_k    = EXPIRY_K,
