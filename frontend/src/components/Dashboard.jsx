@@ -68,18 +68,24 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
   const boostPct = baselineProfit > 0 ? (((optimalProfit - baselineProfit) / baselineProfit) * 100).toFixed(1) : 0;
 
   const getColor = (val) => {
-    // Tri-color scale: #1e1b4b (30,27,75) -> #0f172a (15,23,42) -> #10b981 (16,185,129)
-    if (val <= midP) {
-      const ratio = (val - minP) / (midP - minP || 1);
-      const r = Math.round(30 + ratio * (15 - 30));
-      const g = Math.round(27 + ratio * (23 - 27));
-      const b = Math.round(75 + ratio * (42 - 75));
+    const ratio = (val - minP) / (maxP - minP || 1);
+    if (ratio < 0.33) {
+      const rRatio = ratio / 0.33;
+      const r = Math.round(15 + rRatio * (124 - 15));
+      const g = Math.round(23 + rRatio * (58 - 23));
+      const b = Math.round(42 + rRatio * (237 - 42));
+      return `rgb(${r}, ${g}, ${b})`;
+    } else if (ratio < 0.66) {
+      const rRatio = (ratio - 0.33) / 0.33;
+      const r = Math.round(124 + rRatio * (219 - 124));
+      const g = Math.round(58 + rRatio * (39 - 58));
+      const b = Math.round(237 + rRatio * (119 - 237));
       return `rgb(${r}, ${g}, ${b})`;
     } else {
-      const ratio = (val - midP) / (maxP - midP || 1);
-      const r = Math.round(15 + ratio * (16 - 15));
-      const g = Math.round(23 + ratio * (185 - 23));
-      const b = Math.round(42 + ratio * (129 - 42));
+      const rRatio = (ratio - 0.66) / 0.34;
+      const r = Math.round(219 + rRatio * (251 - 219));
+      const g = Math.round(39 + rRatio * (113 - 39));
+      const b = Math.round(119 + rRatio * (133 - 119));
       return `rgb(${r}, ${g}, ${b})`;
     }
   };
@@ -113,7 +119,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
           {qVals.map(q => (
             <div 
               key={`hq-${q}`} 
-              className={`text-[10px] text-white/80 font-semibold flex items-center justify-center sticky top-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverQ === q ? 'text-[#38bdf8] bg-white/5' : ''}`}
+              className={`text-[10px] text-white/80 font-semibold flex items-center justify-center sticky top-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverQ === q ? 'text-[#fb7185] bg-[rgba(124,58,237,0.1)]' : ''}`}
             >
               {q}
             </div>
@@ -122,7 +128,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
           {rVals.map(r => (
             <React.Fragment key={`row-${r}`}>
               <div 
-                className={`text-[10px] text-white/80 font-semibold flex items-center justify-center sticky left-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverR === r ? 'text-[#38bdf8] bg-white/5' : ''}`}
+                className={`text-[10px] text-white/80 font-semibold flex items-center justify-center sticky left-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverR === r ? 'text-[#fb7185] bg-[rgba(124,58,237,0.1)]' : ''}`}
               >
                 {r}
               </div>
@@ -143,15 +149,15 @@ Profit=${cell?.profit?.toFixed(2)} (Avg over 5 runs)
 Delta vs Current: ${diffStr} EGP`}
                     className={`cursor-pointer transition-all flex items-center justify-center text-[12px] relative
                       border border-white/5
-                      ${isHovered ? 'bg-white/5 z-0 outline outline-1 outline-white/30' : ''}
-                      ${isOpt ? 'outline outline-2 outline-yellow-400 z-10 shadow-[0_0_15px_rgba(250,204,21,0.7)] bg-yellow-400/20' : ''}
+                      ${isHovered ? 'bg-[rgba(124,58,237,0.1)] z-0 outline outline-1 outline-white/30' : ''}
+                      ${isOpt ? 'outline outline-2 outline-[#fb7185] z-10 shadow-[0_0_15px_rgba(251,113,133,0.6)] bg-[#fb7185]/20' : ''}
                     `}
                     style={{ 
                       height: `${cellSize}px`, 
                       backgroundColor: cell && !isOpt && !isHovered ? getColor(cell.profit) : (cell && (isOpt || isHovered) ? undefined : 'transparent'),
                     }}
                   >
-                    {isOpt && <span className="drop-shadow-[0_0_8px_rgba(250,204,21,1)]">⭐</span>}
+                    {isOpt && <span className="drop-shadow-[0_0_8px_rgba(251,113,133,0.8)]">⭐</span>}
                   </div>
                 );
               })}
@@ -161,14 +167,14 @@ Delta vs Current: ${diffStr} EGP`}
       </div>
 
       {optimalRq && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs bg-black/20 p-4 rounded-xl border border-[#10b981]/30">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs bg-black/20 p-4 rounded-xl border border-[#db2777]/30">
           <div className="text-white/80">
-            <span className="text-[#10b981] font-bold">🎯 Strategic Sweet Spot:</span> Achieving the perfect balance at <strong>R={optimalRq.r}</strong> and <strong>Q={optimalRq.q}</strong> can boost your stability by <strong className="text-white">{boostPct}%</strong>.
+            <span className="text-[#fb7185] font-bold">🎯 Strategic Sweet Spot:</span> Achieving the perfect balance at <strong>R={optimalRq.r}</strong> and <strong>Q={optimalRq.q}</strong> can boost your stability by <strong className="text-white">{boostPct}%</strong>.
           </div>
           <button 
             type="button"
             onClick={() => onApply && onApply(optimalRq.r, optimalRq.q)}
-            className="px-4 py-2 bg-[#10b981] hover:bg-[#059669] text-white font-bold rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all shrink-0"
+            className="px-4 py-2 bg-gradient-to-r from-[#7c3aed] to-[#db2777] hover:from-[#6d28d9] hover:to-[#be185d] text-white font-bold rounded-lg shadow-[0_0_15px_rgba(219,39,119,0.4)] transition-all shrink-0"
           >
             Apply Optimal Settings
           </button>
@@ -663,8 +669,8 @@ export default function Dashboard() {
                             )}
                           </div>
                           {!loading && qData && (
-                            <div className="text-xs text-center bg-black/20 p-3 rounded-lg border border-[#10b981]/30">
-                              <span className="text-[#10b981] font-bold">💡 Optimized Recommendation:</span> Setting Q to <strong className="text-white text-sm px-1">{qData.optimal_q}</strong> maximizes your daily profit based on current constraints.
+                            <div className="text-xs text-center bg-black/20 p-3 rounded-lg border border-[#db2777]/30">
+                              <span className="text-[#fb7185] font-bold">💡 Optimized Recommendation:</span> Setting Q to <strong className="text-white text-sm px-1">{qData.optimal_q}</strong> maximizes your daily profit based on current constraints.
                             </div>
                           )}
                         </div>
