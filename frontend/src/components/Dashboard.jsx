@@ -10,7 +10,7 @@ import html2canvas from 'html2canvas';
 import { motion, AnimatePresence, animate } from 'framer-motion';
 
 /* ── Smooth animated number counter ── */
-const AnimatedCounter = ({ value, suffix = '', decimals = 0 }) => {
+const CountUp = ({ value, suffix = '', decimals = 0 }) => {
   const ref = useRef(null);
   useEffect(() => {
     if (!ref.current || value == null || isNaN(value)) return;
@@ -28,6 +28,8 @@ const AnimatedCounter = ({ value, suffix = '', decimals = 0 }) => {
 /* ── KPI card with neon hover glow ── */
 const KPICard = ({ title, rawValue, suffix = '', decimals = 0, icon: Icon, colorClass }) => (
   <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
     whileHover={{ scale: 1.03, boxShadow: '0 0 22px rgba(56,189,248,0.45)' }}
     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
     className="glass-panel p-6 flex items-center space-x-4"
@@ -38,7 +40,7 @@ const KPICard = ({ title, rawValue, suffix = '', decimals = 0, icon: Icon, color
     <div>
       <h3 className="text-sm font-medium text-white/60">{title}</h3>
       <p className="text-2xl font-bold text-white">
-        <AnimatedCounter value={rawValue} suffix={suffix} decimals={decimals} />
+        <CountUp value={rawValue} suffix={suffix} decimals={decimals} />
       </p>
     </div>
   </motion.div>
@@ -140,14 +142,15 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
                 const diffStr = profitDiff > 0 ? `+${profitDiff.toFixed(0)}` : profitDiff.toFixed(0);
                 
                 return (
-                  <div
+                  <motion.div
                     key={`cell-${r}-${q}`}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: (rVals.indexOf(r) + qVals.indexOf(q)) * 0.02, duration: 0.3 }}
                     onMouseEnter={() => { setHoverR(r); setHoverQ(q); }}
                     onMouseLeave={() => { setHoverR(null); setHoverQ(null); }}
-                    title={`R=${r}, Q=${q}
-Profit=${cell?.profit?.toFixed(2)} (Avg over 5 runs)
-Delta vs Current: ${diffStr} EGP`}
-                    className={`cursor-pointer transition-all flex items-center justify-center text-[12px] relative
+                    title={`R=${r}, Q=${q}\nProfit=${cell?.profit?.toFixed(2)} (Avg over 5 runs)\nDelta vs Current: ${diffStr} EGP`}
+                    className={`cursor-pointer transition-colors flex items-center justify-center text-[12px] relative
                       border-[1px] border-[rgba(255,255,255,0.03)]
                       ${isHovered ? 'bg-[rgba(6,182,212,0.15)] z-0 outline outline-1 outline-white/30' : ''}
                       ${isOpt ? 'outline outline-2 outline-[#2dd4bf] z-10 shadow-[0_0_15px_rgba(6,182,212,0.4)] bg-[#2dd4bf]/20' : ''}
@@ -157,8 +160,16 @@ Delta vs Current: ${diffStr} EGP`}
                       backgroundColor: cell && !isOpt && !isHovered ? getColor(cell.profit) : (cell && (isOpt || isHovered) ? undefined : 'transparent'),
                     }}
                   >
-                    {isOpt && <span className="drop-shadow-[0_0_8px_rgba(45,212,191,0.8)]">⭐</span>}
-                  </div>
+                    {isOpt && (
+                      <motion.span 
+                        animate={{ scale: [1, 1.1, 1] }} 
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="drop-shadow-[0_0_8px_rgba(45,212,191,0.8)] inline-block"
+                      >
+                        ⭐
+                      </motion.span>
+                    )}
+                  </motion.div>
                 );
               })}
             </React.Fragment>
@@ -539,15 +550,33 @@ export default function Dashboard() {
                 <div className="flex space-x-2">
                   <button
                     onClick={() => setActiveTab('charts')}
-                    className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all ${activeTab === 'charts' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
+                    className={`relative px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors ${activeTab === 'charts' ? 'text-white' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
                   >
-                    <BarChart2 size={16} /> Charts
+                    {activeTab === 'charts' && (
+                      <motion.div
+                        layoutId="activeTabIndicator"
+                        className="absolute inset-0 bg-primary rounded-lg shadow-lg shadow-primary/20"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                      <BarChart2 size={16} /> Charts
+                    </span>
                   </button>
                   <button
                     onClick={() => setActiveTab('log')}
-                    className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all ${activeTab === 'log' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
+                    className={`relative px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors ${activeTab === 'log' ? 'text-white' : 'text-white/60 hover:text-white hover:bg-white/10'}`}
                   >
-                    <List size={16} /> Simulation Table
+                    {activeTab === 'log' && (
+                      <motion.div
+                        layoutId="activeTabIndicator"
+                        className="absolute inset-0 bg-primary rounded-lg shadow-lg shadow-primary/20"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                      <List size={16} /> Simulation Table
+                    </span>
                   </button>
                 </div>
 
@@ -731,11 +760,11 @@ export default function Dashboard() {
                           <div className="space-y-2">
                             <div className="flex justify-between">
                               <span className="text-white/80">Lost Sales Cost:</span>
-                              <span className="text-warning font-bold"><AnimatedCounter value={simData?.kpis?.lost_sales_cost ?? 0} suffix=" EGP" decimals={0} /></span>
+                              <span className="text-warning font-bold"><CountUp value={simData?.kpis?.lost_sales_cost ?? 0} suffix=" EGP" decimals={0} /></span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-white/80">Waste Cost:</span>
-                              <span className="text-red-400 font-bold"><AnimatedCounter value={simData?.kpis?.waste_cost ?? 0} suffix=" EGP" decimals={0} /></span>
+                              <span className="text-red-400 font-bold"><CountUp value={simData?.kpis?.waste_cost ?? 0} suffix=" EGP" decimals={0} /></span>
                             </div>
                           </div>
                         </div>
