@@ -333,7 +333,7 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <div className="space-y-4 max-h-[75vh] overflow-y-auto overflow-x-hidden pb-4 pr-2 custom-scrollbar">
+            <div className="space-y-4 max-h-[75vh] overflow-y-auto overflow-x-hidden pb-2 pr-2 custom-scrollbar">
               <h3 className="text-sm text-primary font-semibold uppercase tracking-wider">Simulation Setting</h3>
               <div className="grid grid-cols-1 gap-4 mb-4">
                 <div>
