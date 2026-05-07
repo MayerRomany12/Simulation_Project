@@ -71,28 +71,28 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
     const ratio = (val - minP) / (maxP - minP || 1);
     if (ratio < 0.33) {
       const rRatio = ratio / 0.33;
-      const r = Math.round(15 + rRatio * (124 - 15));
-      const g = Math.round(23 + rRatio * (58 - 23));
-      const b = Math.round(42 + rRatio * (237 - 42));
+      const r = Math.round(15 + rRatio * (13 - 15));
+      const g = Math.round(23 + rRatio * (148 - 23));
+      const b = Math.round(42 + rRatio * (136 - 42));
       return `rgb(${r}, ${g}, ${b})`;
     } else if (ratio < 0.66) {
       const rRatio = (ratio - 0.33) / 0.33;
-      const r = Math.round(124 + rRatio * (219 - 124));
-      const g = Math.round(58 + rRatio * (39 - 58));
-      const b = Math.round(237 + rRatio * (119 - 237));
+      const r = Math.round(13 + rRatio * (6 - 13));
+      const g = Math.round(148 + rRatio * (182 - 148));
+      const b = Math.round(136 + rRatio * (212 - 136));
       return `rgb(${r}, ${g}, ${b})`;
     } else {
       const rRatio = (ratio - 0.66) / 0.34;
-      const r = Math.round(219 + rRatio * (251 - 219));
-      const g = Math.round(39 + rRatio * (113 - 39));
-      const b = Math.round(119 + rRatio * (133 - 119));
+      const r = Math.round(6 + rRatio * (45 - 6));
+      const g = Math.round(182 + rRatio * (212 - 182));
+      const b = Math.round(212 + rRatio * (191 - 212));
       return `rgb(${r}, ${g}, ${b})`;
     }
   };
 
   return (
     <div className="flex flex-col space-y-4">
-      <div className="flex items-center justify-between text-xs text-white/70 bg-black/20 p-2 rounded border border-white/5">
+      <div className="flex items-center justify-between text-xs text-white/70 bg-black/20 p-2 rounded border-[1px] border-[rgba(255,255,255,0.03)]">
         <div className="flex items-center gap-2">
           <span>Zoom:</span>
           <input 
@@ -119,7 +119,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
           {qVals.map(q => (
             <div 
               key={`hq-${q}`} 
-              className={`text-[10px] text-white/80 font-semibold flex items-center justify-center sticky top-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverQ === q ? 'text-[#fb7185] bg-[rgba(124,58,237,0.1)]' : ''}`}
+              className={`text-[10px] text-white/80 font-semibold flex items-center justify-center sticky top-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverQ === q ? 'text-[#2dd4bf] bg-[rgba(6,182,212,0.15)]' : ''}`}
             >
               {q}
             </div>
@@ -128,7 +128,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
           {rVals.map(r => (
             <React.Fragment key={`row-${r}`}>
               <div 
-                className={`text-[10px] text-white/80 font-semibold flex items-center justify-center sticky left-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverR === r ? 'text-[#fb7185] bg-[rgba(124,58,237,0.1)]' : ''}`}
+                className={`text-[10px] text-white/80 font-semibold flex items-center justify-center sticky left-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverR === r ? 'text-[#2dd4bf] bg-[rgba(6,182,212,0.15)]' : ''}`}
               >
                 {r}
               </div>
@@ -148,16 +148,16 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
 Profit=${cell?.profit?.toFixed(2)} (Avg over 5 runs)
 Delta vs Current: ${diffStr} EGP`}
                     className={`cursor-pointer transition-all flex items-center justify-center text-[12px] relative
-                      border border-white/5
-                      ${isHovered ? 'bg-[rgba(124,58,237,0.1)] z-0 outline outline-1 outline-white/30' : ''}
-                      ${isOpt ? 'outline outline-2 outline-[#fb7185] z-10 shadow-[0_0_15px_rgba(251,113,133,0.6)] bg-[#fb7185]/20' : ''}
+                      border-[1px] border-[rgba(255,255,255,0.03)]
+                      ${isHovered ? 'bg-[rgba(6,182,212,0.15)] z-0 outline outline-1 outline-white/30' : ''}
+                      ${isOpt ? 'outline outline-2 outline-[#2dd4bf] z-10 shadow-[0_0_15px_rgba(6,182,212,0.4)] bg-[#2dd4bf]/20' : ''}
                     `}
                     style={{ 
                       height: `${cellSize}px`, 
                       backgroundColor: cell && !isOpt && !isHovered ? getColor(cell.profit) : (cell && (isOpt || isHovered) ? undefined : 'transparent'),
                     }}
                   >
-                    {isOpt && <span className="drop-shadow-[0_0_8px_rgba(251,113,133,0.8)]">⭐</span>}
+                    {isOpt && <span className="drop-shadow-[0_0_8px_rgba(45,212,191,0.8)]">⭐</span>}
                   </div>
                 );
               })}
@@ -167,14 +167,14 @@ Delta vs Current: ${diffStr} EGP`}
       </div>
 
       {optimalRq && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs bg-black/20 p-4 rounded-xl border border-[#db2777]/30">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs bg-black/20 p-4 rounded-xl border border-[#06b6d4]/30">
           <div className="text-white/80">
-            <span className="text-[#fb7185] font-bold">🎯 Strategic Sweet Spot:</span> Achieving the perfect balance at <strong>R={optimalRq.r}</strong> and <strong>Q={optimalRq.q}</strong> can boost your stability by <strong className="text-white">{boostPct}%</strong>.
+            <span className="text-[#06b6d4] font-bold">🎯 Strategic Sweet Spot:</span> Achieving the perfect balance at <strong>R={optimalRq.r}</strong> and <strong>Q={optimalRq.q}</strong> can boost your stability by <strong className="text-white">{boostPct}%</strong>.
           </div>
           <button 
             type="button"
             onClick={() => onApply && onApply(optimalRq.r, optimalRq.q)}
-            className="px-4 py-2 bg-gradient-to-r from-[#7c3aed] to-[#db2777] hover:from-[#6d28d9] hover:to-[#be185d] text-white font-bold rounded-lg shadow-[0_0_15px_rgba(219,39,119,0.4)] transition-all shrink-0"
+            className="px-4 py-2 bg-gradient-to-r from-[#0d9488] to-[#06b6d4] hover:from-[#0f766e] hover:to-[#0891b2] text-white font-bold rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all shrink-0"
           >
             Apply Optimal Settings
           </button>
@@ -553,7 +553,7 @@ export default function Dashboard() {
 
                 {/* Live Trace Controls */}
                 {activeTab === 'charts' && (
-                  <div className="flex items-center gap-3 bg-black/30 px-4 py-2 rounded-lg border border-white/5">
+                  <div className="flex items-center gap-3 bg-black/30 px-4 py-2 rounded-lg border-[1px] border-[rgba(255,255,255,0.03)]">
                     {isTracing ? (
                       <button
                         onClick={handleStopTrace}
@@ -669,8 +669,8 @@ export default function Dashboard() {
                             )}
                           </div>
                           {!loading && qData && (
-                            <div className="text-xs text-center bg-black/20 p-3 rounded-lg border border-[#db2777]/30">
-                              <span className="text-[#fb7185] font-bold">💡 Optimized Recommendation:</span> Setting Q to <strong className="text-white text-sm px-1">{qData.optimal_q}</strong> maximizes your daily profit based on current constraints.
+                            <div className="text-xs text-center bg-black/20 p-3 rounded-lg border border-[#06b6d4]/30">
+                              <span className="text-[#06b6d4] font-bold">💡 Optimized Recommendation:</span> Setting Q to <strong className="text-white text-sm px-1">{qData.optimal_q}</strong> maximizes your daily profit based on current constraints.
                             </div>
                           )}
                         </div>
@@ -702,7 +702,7 @@ export default function Dashboard() {
                           {loading || !stressData ? (
                             <div className="h-64 flex items-center justify-center text-white/30 animate-pulse">Loading Data...</div>
                           ) : Object.entries(stressData).map(([scenario, data]) => (
-                            <div key={scenario} className="bg-black/20 p-4 rounded-lg border border-white/5 relative overflow-hidden group">
+                            <div key={scenario} className="bg-black/20 p-4 rounded-lg border-[1px] border-[rgba(255,255,255,0.03)] relative overflow-hidden group">
                               <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                               <div className="flex justify-between items-center mb-2">
                                 <span className="font-semibold text-white/90">{scenario}</span>
