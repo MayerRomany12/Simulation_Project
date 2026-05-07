@@ -95,15 +95,15 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
     const ratio = (val - minP) / (maxP - minP || 1);
     if (ratio < 0.25) {
       const rRatio = ratio / 0.25;
-      const r = Math.round(10 + rRatio * (30 - 10));
-      const g = Math.round(15 + rRatio * (27 - 15));
-      const b = Math.round(36 + rRatio * (75 - 36));
+      const r = Math.round(10 + rRatio * (76 - 10));
+      const g = Math.round(15 + rRatio * (29 - 15));
+      const b = Math.round(36 + rRatio * (149 - 36));
       return `rgb(${r}, ${g}, ${b})`;
     } else if (ratio < 0.5) {
       const rRatio = (ratio - 0.25) / 0.25;
-      const r = Math.round(30 + rRatio * (15 - 30));
-      const g = Math.round(27 + rRatio * (118 - 27));
-      const b = Math.round(75 + rRatio * (110 - 75));
+      const r = Math.round(76 + rRatio * (15 - 76));
+      const g = Math.round(29 + rRatio * (118 - 29));
+      const b = Math.round(149 + rRatio * (110 - 149));
       return `rgb(${r}, ${g}, ${b})`;
     } else if (ratio < 0.75) {
       const rRatio = (ratio - 0.5) / 0.25;
@@ -113,9 +113,9 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
       return `rgb(${r}, ${g}, ${b})`;
     } else {
       const rRatio = (ratio - 0.75) / 0.25;
-      const r = Math.round(6 + rRatio * (16 - 6));
-      const g = Math.round(182 + rRatio * (185 - 182));
-      const b = Math.round(212 + rRatio * (129 - 212));
+      const r = Math.round(6 + rRatio * (45 - 6));
+      const g = Math.round(182 + rRatio * (212 - 182));
+      const b = Math.round(212 + rRatio * (191 - 212));
       return `rgb(${r}, ${g}, ${b})`;
     }
   };
@@ -129,7 +129,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
             type="range" min="30" max="80" step="5" 
             value={cellSize} 
             onChange={e => setCellSize(Number(e.target.value))} 
-            className="w-24 accent-accent"
+            className="w-24 accent-cyan-400"
           />
         </div>
         
@@ -139,7 +139,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
             <span>Avg</span>
             <span>Peak</span>
           </div>
-          <div className="h-1.5 rounded-full w-full shadow-inner" style={{ background: 'linear-gradient(to right, #0a0f24, #1e1b4b, #0f766e, #06b6d4, #10b981)' }} />
+          <div className="h-1.5 rounded-full w-full shadow-inner" style={{ background: 'linear-gradient(to right, #0a0f24, #4c1d95, #0f766e, #06b6d4, #2dd4bf)' }} />
         </div>
 
         <div className="text-[10px] text-slate-400">Hover for coords & delta</div>
@@ -150,9 +150,9 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
           style={{
             display: 'grid',
             gridTemplateColumns: `auto repeat(${qVals.length}, ${cellSize}px)`,
-            gap: '1px',
-            backgroundColor: 'rgba(255,255,255,0.05)',
-            padding: '1px'
+            gap: '2px',
+            backgroundColor: 'transparent',
+            padding: '4px'
           }}
         >
           <div className="text-xs text-slate-400 flex items-center justify-center p-2 sticky left-0 top-0 bg-[#0f172a] z-20 backdrop-blur-md">R \ Q</div>
@@ -188,18 +188,22 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
                     transition={{ delay: (rVals.indexOf(r) + qVals.indexOf(q)) * 0.02, duration: 0.3 }}
                     onMouseEnter={() => { setHoverR(r); setHoverQ(q); }}
                     onMouseLeave={() => { setHoverR(null); setHoverQ(null); }}
-                    title={`R=${r}, Q=${q}\nProfit=${cell?.profit?.toFixed(2)} (Avg over 5 runs)\nDelta vs Current: ${diffStr} EGP`}
-                    className={`cursor-pointer transition-all duration-200 flex items-center justify-center text-[12px] relative
-                      border border-slate-800/50
-                      ${isHoveredRowOrCol && !isExactHovered ? 'brightness-125 z-0' : ''}
-                      ${isExactHovered ? 'ring-1 ring-white z-20 scale-110 shadow-lg' : ''}
-                      ${isOpt ? 'ring-2 ring-[#a3e635] z-10 shadow-[0_0_15px_rgba(163,230,53,0.4)]' : ''}
+                    className={`cursor-pointer transition-all duration-200 flex items-center justify-center text-[12px] relative rounded-sm
+                      ${isExactHovered ? 'ring-1 ring-white/50 z-20 scale-110 shadow-lg' : ''}
+                      ${isOpt ? 'ring-2 ring-[#fde047] z-10 shadow-[0_0_15px_#fde047]' : ''}
                     `}
                     style={{ 
                       height: `${cellSize}px`, 
                       backgroundColor: cell ? getColor(cell.profit) : 'transparent',
                     }}
                   >
+                    {isExactHovered && (
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-lg p-2 text-sm text-white w-max z-50 pointer-events-none shadow-xl flex flex-col gap-1 items-center">
+                        <div className="font-bold text-cyan-400">R: {r} | Q: {q}</div>
+                        <div>Profit: {cell?.profit?.toFixed(2)} EGP</div>
+                        <div className="text-xs text-slate-300">Delta: {diffStr} EGP</div>
+                      </div>
+                    )}
                     {isOpt && (
                       <div className="relative flex items-center justify-center">
                         <motion.span 
@@ -241,7 +245,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
       </div>
 
       {optimalRq && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs bg-black/20 p-4 rounded-xl border border-[#06b6d4]/30">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs bg-white/5 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-[0_0_20px_rgba(6,182,212,0.1)]">
           <div className="text-white/80">
             <span className="text-[#06b6d4] font-bold">🎯 Strategic Sweet Spot:</span> Achieving the perfect balance at <strong>R={optimalRq.r}</strong> and <strong>Q={optimalRq.q}</strong> can boost your stability by <strong className="text-white">{boostPct}%</strong>.
           </div>
@@ -254,7 +258,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
               setTimeout(() => setShowBurst(false), 1000);
               if (onApply) onApply(optimalRq.r, optimalRq.q);
             }}
-            className="relative px-4 py-2 bg-gradient-to-r from-[#0d9488] to-[#06b6d4] hover:from-[#0f766e] hover:to-[#0891b2] text-white font-bold rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-colors shrink-0 z-10"
+            className="relative px-4 py-2 bg-gradient-to-r from-cyan-600 to-teal-500 hover:from-cyan-500 hover:to-teal-400 text-white font-bold rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-colors shrink-0 z-10"
           >
             Apply Optimal Settings
           </motion.button>
