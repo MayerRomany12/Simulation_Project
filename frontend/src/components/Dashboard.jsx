@@ -775,17 +775,17 @@ export default function Dashboard() {
                   <motion.div key="charts" variants={tab} initial="hidden" animate="show" exit="exit" transition={{ duration: 0.25 }} className="space-y-10">
                     {/* Charts Row 1 */}
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-                      <div className="glass-panel glass-glow-hover p-6">
-                        <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
+                      <div className="glass-panel glass-glow-hover p-4 pb-2 flex flex-col h-full">
+                        <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2 px-2">
                           <TrendingUp className="text-primary" size={20} />
                           Inventory Timeline (Live Trace)
                         </h3>
-                        <div className="h-72">
+                        <div className="flex-1 min-h-[320px]">
                           {loading || !simData ? (
                             <div className="w-full h-full flex items-center justify-center text-white/30 animate-pulse">Loading Chart...</div>
                           ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                              <AreaChart data={timelineToRender}>
+                              <AreaChart data={timelineToRender} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <defs>
                                   <linearGradient id="colorInvA" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.3} />
@@ -803,7 +803,7 @@ export default function Dashboard() {
                                   contentStyle={{ backgroundColor: 'rgba(15,23,42,0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}
                                   itemStyle={{ color: '#fff' }}
                                 />
-                                <Legend />
+                                <Legend wrapperStyle={{ paddingTop: '10px' }} />
                                 <Area type="stepAfter" dataKey="inv_end_a" name="Inv A" stroke="#38bdf8" fillOpacity={1} fill="url(#colorInvA)" isAnimationActive={true} animationDuration={1500} animationEasing="ease-in-out" />
                                 <Area type="stepAfter" dataKey="inv_end_b" name="Inv B" stroke="#f472b6" fillOpacity={1} fill="url(#colorInvB)" isAnimationActive={true} animationDuration={1500} animationEasing="ease-in-out" />
                               </AreaChart>
