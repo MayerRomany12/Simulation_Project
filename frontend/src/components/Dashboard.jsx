@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { runSimulation, runStressTest, runProfitVsQ, runSensitivityRQ, suggestR } from '../api';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  BarChart, Bar, Legend, Cell, ReferenceLine
+  BarChart, Bar, Legend, Cell, ReferenceLine, PieChart, Pie
 } from 'recharts';
-import { Activity, DollarSign, Package, AlertTriangle, TrendingUp, RefreshCw, Download, List, BarChart2, Play, Square, Settings, Info } from 'lucide-react';
+import { Activity, DollarSign, Package, AlertTriangle, TrendingUp, RefreshCw, Download, List, BarChart2, Play, Square, Settings, Info, PieChart as PieChartIcon } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence, animate } from 'framer-motion';
@@ -276,6 +276,51 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
           />
         )}
       </AnimatePresence>
+    </div>
+  );
+};
+
+const FinancialLeakageChart = ({ data }) => {
+  if (!data) return <div className="text-white/50 text-center py-10">No data</div>;
+  
+  const chartData = [
+    { name: 'Holding Cost', value: data.holding_cost_a || data.holding_cost || 0, color: '#6366f1' },
+    { name: 'Ordering Cost', value: data.ordering_cost_a || data.ordering_cost || 0, color: '#14b8a6' },
+    { name: 'Lost Sales Cost', value: data.lost_sales_cost_a || data.lost_sales_cost || 0, color: '#f43f5e' },
+    { name: 'Waste Cost', value: data.waste_cost_a || data.waste_cost || 0, color: '#f59e0b' }
+  ].filter(d => d.value > 0);
+
+  if (chartData.length === 0) return <div className="text-white/50 text-center py-10">Zero Costs</div>;
+
+  return (
+    <div className="flex flex-col h-full space-y-2">
+      <div className="flex-1 min-h-[220px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={80}
+              paddingAngle={5}
+              dataKey="value"
+              stroke="none"
+              isAnimationActive={true}
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <RechartsTooltip 
+              contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
+              itemStyle={{ color: '#fff' }}
+              formatter={(value) => [`${Number(value).toFixed(2)} EGP`, '']}
+            />
+            <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };
@@ -823,27 +868,43 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      <div className="glass-panel glass-glow-hover p-6">
-                        <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
-                          <AlertTriangle className="text-warning" size={20} />
-                          Stress Test Comparison
-                        </h3>
-                        <div className="space-y-4">
-                          {loading || !stressData ? (
-                            <div className="h-64 flex items-center justify-center text-white/30 animate-pulse">Loading Data...</div>
-                          ) : Object.entries(stressData).map(([scenario, data]) => (
-                            <div key={scenario} className="bg-black/20 p-4 rounded-lg border-[1px] border-[rgba(255,255,255,0.03)] relative overflow-hidden group">
-                              <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="font-semibold text-white/90">{scenario}</span>
-                                <span className="text-primary font-bold">{data.avg_profit?.toFixed(0)} EGP</span>
+                      <div className="flex flex-col gap-10">
+                        <div className="glass-panel glass-glow-hover p-6">
+                          <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
+                            <AlertTriangle className="text-warning" size={20} />
+                            Stress Test Comparison
+                          </h3>
+                          <div className="space-y-4">
+                            {loading || !stressData ? (
+                              <div className="h-64 flex items-center justify-center text-white/30 animate-pulse">Loading Data...</div>
+                            ) : Object.entries(stressData).map(([scenario, data]) => (
+                              <div key={scenario} className="bg-black/20 p-4 rounded-lg border-[1px] border-[rgba(255,255,255,0.03)] relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="font-semibold text-white/90">{scenario}</span>
+                                  <span className="text-primary font-bold">{data.avg_profit?.toFixed(0)} EGP</span>
+                                </div>
+                                <div className="flex justify-between text-sm text-white/60">
+                                  <span>Service A: {(data.service_level_a * 100).toFixed(1)}%</span>
+                                  <span>Waste A: {data.waste_pct_a?.toFixed(1)}%</span>
+                                </div>
                               </div>
-                              <div className="flex justify-between text-sm text-white/60">
-                                <span>Service A: {(data.service_level_a * 100).toFixed(1)}%</span>
-                                <span>Waste A: {data.waste_pct_a?.toFixed(1)}%</span>
-                              </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="glass-panel glass-glow-hover p-6 flex-1 flex flex-col">
+                          <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
+                            <PieChartIcon className="text-rose-500" size={20} />
+                            Cost Breakdown
+                          </h3>
+                          <div className="flex-1">
+                            {loading || !simData ? (
+                              <div className="h-full w-full flex items-center justify-center text-white/30 animate-pulse">Analyzing Leakage...</div>
+                            ) : (
+                              <FinancialLeakageChart data={simData.kpis} />
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -857,16 +918,59 @@ export default function Dashboard() {
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-black/30 p-4 rounded-lg border border-white/10">
-                          <h4 className="text-sm text-white/50 mb-2">Daily Costs Breakdown (EGP)</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between">
-                              <span className="text-white/80">Lost Sales Cost:</span>
-                              <span className="text-warning font-bold"><CountUp value={simData?.kpis?.lost_sales_cost ?? 0} suffix=" EGP" decimals={0} /></span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-white/80">Waste Cost:</span>
-                              <span className="text-red-400 font-bold"><CountUp value={simData?.kpis?.waste_cost ?? 0} suffix=" EGP" decimals={0} /></span>
-                            </div>
+                          <h4 className="text-sm text-white/50 mb-4">Daily Costs Breakdown (EGP)</h4>
+                          <div className="space-y-4">
+                            {(() => {
+                              const holding = simData?.kpis?.holding_cost_a || simData?.kpis?.holding_cost || 0;
+                              const ordering = simData?.kpis?.ordering_cost_a || simData?.kpis?.ordering_cost || 0;
+                              const lostSales = simData?.kpis?.lost_sales_cost_a || simData?.kpis?.lost_sales_cost || 0;
+                              const waste = simData?.kpis?.waste_cost_a || simData?.kpis?.waste_cost || 0;
+                              const totalCost = holding + ordering + lostSales + waste || 1;
+
+                              return (
+                                <>
+                                  <div>
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="text-xs text-slate-400">Holding Cost:</span>
+                                      <span className="text-[#6366f1] font-bold"><CountUp value={holding} suffix=" EGP" decimals={0} /></span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-slate-800 rounded-full">
+                                      <div className="h-1.5 rounded-full bg-[#6366f1]" style={{ width: `${(holding / totalCost) * 100}%` }}></div>
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="text-xs text-slate-400">Ordering Cost:</span>
+                                      <span className="text-[#14b8a6] font-bold"><CountUp value={ordering} suffix=" EGP" decimals={0} /></span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-slate-800 rounded-full">
+                                      <div className="h-1.5 rounded-full bg-[#14b8a6]" style={{ width: `${(ordering / totalCost) * 100}%` }}></div>
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="text-xs text-slate-400">Lost Sales Cost:</span>
+                                      <span className="text-[#f43f5e] font-bold"><CountUp value={lostSales} suffix=" EGP" decimals={0} /></span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-slate-800 rounded-full">
+                                      <div className="h-1.5 rounded-full bg-[#f43f5e]" style={{ width: `${(lostSales / totalCost) * 100}%` }}></div>
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="text-xs text-slate-400">Waste Cost:</span>
+                                      <span className="text-[#f59e0b] font-bold"><CountUp value={waste} suffix=" EGP" decimals={0} /></span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-slate-800 rounded-full">
+                                      <div className="h-1.5 rounded-full bg-[#f59e0b]" style={{ width: `${(waste / totalCost) * 100}%` }}></div>
+                                    </div>
+                                  </div>
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                         <div className="space-y-3">
