@@ -52,7 +52,7 @@ const KPICard = ({ title, rawValue, suffix = '', decimals = 0, icon: Icon, color
       }}
       whileHover={{ scale: 1.03, boxShadow: '0 0 22px rgba(56,189,248,0.45)' }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className={`glass-panel p-6 flex items-center space-x-4 border ${flash ? 'border-green-500' : 'border-white/10'} transition-colors duration-300`}
+      className={`glass-panel glass-glow-hover p-6 flex items-center space-x-4 border ${flash ? 'border-green-500' : 'border-white/10'} transition-colors duration-300`}
     >
       <div className={`p-3 rounded-full bg-black/20 ${colorClass}`}>
         <Icon size={24} />
@@ -71,6 +71,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
   const [cellSize, setCellSize] = useState(40);
   const [hoverR, setHoverR] = useState(null);
   const [hoverQ, setHoverQ] = useState(null);
+  const [showBurst, setShowBurst] = useState(false);
 
   if (!data || data.length === 0) return <div className="text-white/50 text-center py-10">No data</div>;
 
@@ -182,13 +183,36 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
                     }}
                   >
                     {isOpt && (
-                      <motion.span 
-                        animate={{ scale: [1, 1.15, 1] }} 
-                        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                        className="drop-shadow-[0_0_12px_rgba(45,212,191,0.9)] inline-block"
-                      >
-                        ⭐
-                      </motion.span>
+                      <div className="relative flex items-center justify-center">
+                        <motion.span 
+                          animate={{ scale: [1, 1.15, 1] }} 
+                          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                          className="drop-shadow-[0_0_12px_rgba(45,212,191,0.9)] inline-block relative z-10"
+                        >
+                          ⭐
+                        </motion.span>
+                        <AnimatePresence>
+                          {showBurst && Array.from({ length: 12 }).map((_, i) => {
+                            const angle = (i / 12) * Math.PI * 2;
+                            const distance = 30 + Math.random() * 30;
+                            return (
+                              <motion.div
+                                key={`particle-${i}`}
+                                initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                                animate={{ 
+                                  x: Math.cos(angle) * distance, 
+                                  y: Math.sin(angle) * distance, 
+                                  opacity: 0, 
+                                  scale: 0 
+                                }}
+                                transition={{ duration: 0.6 + Math.random() * 0.4, ease: "easeOut" }}
+                                className="absolute w-1.5 h-1.5 bg-cyan-300 rounded-full shadow-[0_0_8px_#67e8f9] pointer-events-none"
+                                style={{ originX: 0.5, originY: 0.5 }}
+                              />
+                            );
+                          })}
+                        </AnimatePresence>
+                      </div>
                     )}
                   </motion.div>
                 );
@@ -207,13 +231,29 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
             type="button"
             whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(6,182,212,0.6)' }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onApply && onApply(optimalRq.r, optimalRq.q)}
-            className="px-4 py-2 bg-gradient-to-r from-[#0d9488] to-[#06b6d4] hover:from-[#0f766e] hover:to-[#0891b2] text-white font-bold rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-colors shrink-0"
+            onClick={() => {
+              setShowBurst(true);
+              setTimeout(() => setShowBurst(false), 1000);
+              if (onApply) onApply(optimalRq.r, optimalRq.q);
+            }}
+            className="relative px-4 py-2 bg-gradient-to-r from-[#0d9488] to-[#06b6d4] hover:from-[#0f766e] hover:to-[#0891b2] text-white font-bold rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-colors shrink-0 z-10"
           >
             Apply Optimal Settings
           </motion.button>
         </div>
       )}
+      
+      <AnimatePresence>
+        {showBurst && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0.5 }}
+            animate={{ scale: 3, opacity: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="fixed top-1/2 left-1/2 w-[100vw] h-[100vw] bg-cyan-400/20 rounded-full pointer-events-none z-50 mix-blend-screen blur-xl"
+            style={{ x: "-50%", y: "-50%" }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -222,7 +262,7 @@ const TooltipLabel = ({ label, tooltip }) => (
   <div className="flex items-center gap-1 group relative mb-1">
     <label className="text-xs text-white/60 block">{label}</label>
     <Info size={12} className="text-white/40 cursor-help" />
-    <div className="absolute left-0 bottom-full mb-2 w-48 p-2 bg-slate-800 text-xs text-white rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 border border-white/10">
+    <div className="absolute left-0 bottom-full mb-2 w-64 max-w-xs p-2 bg-slate-800 text-xs text-white rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] border border-white/10 whitespace-normal">
       {tooltip}
     </div>
   </div>
@@ -446,8 +486,8 @@ export default function Dashboard() {
 
       <motion.div variants={page} initial="hidden" animate="show" className="flex flex-col lg:flex-row gap-12 relative p-4 lg:p-6">
         {/* Sidebar */}
-        <motion.div variants={sidebarItem} className="w-full lg:w-80 shrink-0">
-          <form onSubmit={handleSubmit} className="glass-panel p-6 sticky top-6">
+        <motion.div variants={sidebarItem} className="w-full lg:w-[380px] shrink-0 z-20">
+          <form onSubmit={handleSubmit} className="glass-panel glass-glow-hover p-6 sticky top-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <Settings className="text-primary" />
@@ -458,7 +498,7 @@ export default function Dashboard() {
               </motion.button>
             </div>
 
-            <div className="space-y-4 max-h-[75vh] overflow-y-auto overflow-x-hidden pb-2 pr-2 custom-scrollbar">
+            <div className="space-y-4 max-h-[75vh] overflow-y-auto pb-2 pr-2 custom-scrollbar">
               <h3 className="text-sm text-primary font-semibold uppercase tracking-wider">Simulation Setting</h3>
               <div className="grid grid-cols-1 gap-4 mb-4">
                 <div className="relative group">
@@ -668,7 +708,7 @@ export default function Dashboard() {
                   <motion.div key="charts" variants={tab} initial="hidden" animate="show" exit="exit" transition={{ duration: 0.25 }} className="space-y-10">
                     {/* Charts Row 1 */}
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-                      <div className="glass-panel p-6">
+                      <div className="glass-panel glass-glow-hover p-6">
                         <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
                           <TrendingUp className="text-primary" size={20} />
                           Inventory Timeline (Live Trace)
@@ -705,7 +745,7 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      <div className="glass-panel p-6">
+                      <div className="glass-panel glass-glow-hover p-6">
                         <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
                           <DollarSign className="text-success" size={20} />
                           Profit vs. Order Quantity (Q)
@@ -747,7 +787,7 @@ export default function Dashboard() {
 
                     {/* Charts Row 2 */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                      <div className="glass-panel p-6">
+                      <div className="glass-panel glass-glow-hover p-6">
                         <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
                           <Activity className="text-accent" size={20} />
                           R vs. Q Sensitivity Analysis (Profit)
@@ -761,7 +801,7 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      <div className="glass-panel p-6">
+                      <div className="glass-panel glass-glow-hover p-6">
                         <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
                           <AlertTriangle className="text-warning" size={20} />
                           Stress Test Comparison
@@ -787,7 +827,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Mayer's Executive Insights */}
-                    <div className="glass-panel p-6 bg-gradient-to-br from-indigo-900/40 to-slate-900/80 border-t border-t-accent/50 relative overflow-hidden group">
+                    <div className="glass-panel glass-glow-hover p-6 bg-gradient-to-br from-indigo-900/40 to-slate-900/80 border-t border-t-accent/50 relative overflow-hidden group">
                       <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                       <h3 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
                         <span className="text-accent">&#11088;</span>
@@ -818,7 +858,7 @@ export default function Dashboard() {
                     </div>
                   </motion.div>
                 ) : (
-                  <motion.div key="log" variants={tab} initial="hidden" animate="show" exit="exit" transition={{ duration: 0.25 }} className="glass-panel p-6">
+                  <motion.div key="log" variants={tab} initial="hidden" animate="show" exit="exit" transition={{ duration: 0.25 }} className="glass-panel glass-glow-hover p-6">
                     <h3 className="text-lg font-bold mb-4 text-white flex items-center justify-between">
                       <div className="flex items-center gap-2"><List className="text-secondary" size={20} /> Simulation Table</div>
                       <div className="flex items-center gap-2 text-sm">

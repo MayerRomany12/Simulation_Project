@@ -63,6 +63,15 @@
     @apply bg-surface backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl relative overflow-hidden;
   }
 
+  .glass-glow-hover {
+    @apply transition-all duration-300;
+  }
+  .glass-glow-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(6, 182, 212, 0.25) !important;
+    border-color: rgba(6, 182, 212, 0.4) !important;
+  }
+
   .glass-input {
     @apply bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all;
     color-scheme: dark;
