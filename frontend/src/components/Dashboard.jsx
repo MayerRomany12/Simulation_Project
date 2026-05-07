@@ -150,7 +150,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
           style={{
             display: 'grid',
             gridTemplateColumns: `auto repeat(${qVals.length}, ${cellSize}px)`,
-            gap: '2px',
+            gap: '0px',
             backgroundColor: 'transparent',
             padding: '4px'
           }}
@@ -159,7 +159,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
           {qVals.map(q => (
             <div 
               key={`hq-${q}`} 
-              className={`text-[10px] font-semibold flex items-center justify-center sticky top-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverQ === q ? 'text-white bg-white/5' : 'text-slate-400'}`}
+              className={`text-[10px] font-semibold flex items-center justify-center sticky top-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverQ === q ? 'text-white' : 'text-slate-400'}`}
             >
               {q}
             </div>
@@ -168,7 +168,7 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
           {rVals.map(r => (
             <React.Fragment key={`row-${r}`}>
               <div 
-                className={`text-[10px] font-semibold flex items-center justify-center sticky left-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverR === r ? 'text-white bg-white/5' : 'text-slate-400'}`}
+                className={`text-[10px] font-semibold flex items-center justify-center sticky left-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverR === r ? 'text-white' : 'text-slate-400'}`}
               >
                 {r}
               </div>
@@ -188,8 +188,8 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
                     transition={{ delay: (rVals.indexOf(r) + qVals.indexOf(q)) * 0.02, duration: 0.3 }}
                     onMouseEnter={() => { setHoverR(r); setHoverQ(q); }}
                     onMouseLeave={() => { setHoverR(null); setHoverQ(null); }}
-                    className={`cursor-pointer transition-all duration-200 flex items-center justify-center text-[12px] relative rounded-sm
-                      ${isExactHovered ? 'ring-1 ring-white/50 z-20 scale-110 shadow-lg' : ''}
+                    className={`cursor-pointer transition-all duration-200 flex items-center justify-center text-[12px] relative border border-[#1e293b]
+                      ${isExactHovered ? 'ring-2 ring-white scale-110 z-20 shadow-lg' : ''}
                       ${isOpt ? 'ring-2 ring-[#fde047] z-10 shadow-[0_0_15px_#fde047]' : ''}
                     `}
                     style={{ 
