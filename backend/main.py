@@ -205,16 +205,34 @@ def api_generate_insights(req: InsightsRequest):
 @app.post("/profit-vs-q")
 def api_profit_vs_q(req: SimulationParams):
     params = get_base_params(req)
-    seed_seq = np.random.SeedSequence(req.seed + 1)
     
     # Use fixed expanded range to show full diminishing returns curve
     q_vals = list(range(20, 305, 5))
     
-    nv_df = run_baseline_newsvendor_sim(
-        params, q_vals, n_days=N_DAYS, seed_seq=seed_seq
-    )
+    results = []
     
-    return nv_df.to_dict(orient='records')
+    # Pre-spawn seeds for all iterations to ensure independent streams
+    ss = np.random.SeedSequence(req.seed + 1)
+    child_seeds = ss.spawn(len(q_vals) * 2)
+    
+    idx = 0
+    for q_val in q_vals:
+        rng_a = np.random.default_rng(child_seeds[idx])
+        rng_b = np.random.default_rng(child_seeds[idx+1])
+        idx += 2
+        
+        df = run_multi_period_simulation(
+            params, q_val, req.Q_b, req.R_a, req.R_b,
+            n_days=req.n_days, warmup_days=req.warmup_days, rng_a=rng_a, rng_b=rng_b
+        )
+        kpis = summarise(df)
+        
+        results.append({
+            "Q": q_val,
+            "sim_profit": clean_dict(kpis)["avg_profit"]
+        })
+        
+    return results
 
 @app.post("/sensitivity-rq")
 def api_sensitivity_rq(req: SimulationParams):
