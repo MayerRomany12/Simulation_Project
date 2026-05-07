@@ -252,12 +252,14 @@ def api_profit_vs_q(req: SimulationParams):
 def api_sensitivity_rq(req: SimulationParams):
     params = get_base_params(req)
     
-    # Range: Q-20 to Q+20, step 5
-    # For a 2D heatmap, we will vary R_a and Q_a around their given values.
-    # We will keep B constant for the sake of standard 2D heatmap
+    # 15x15 dynamic range grid
+    step = 5
     
-    r_range = list(range(max(0, req.R_a - 20), req.R_a + 25, 5))
-    q_range = list(range(max(0, req.Q_a - 20), req.Q_a + 25, 5))
+    # Calculate ranges avoiding negatives, keeping 15 values
+    r_start = max(0, req.R_a - 7 * step)
+    q_start = max(0, req.Q_a - 7 * step)
+    r_range = list(range(r_start, r_start + 15 * step, step))
+    q_range = list(range(q_start, q_start + 15 * step, step))
     
     results = []
     
@@ -265,6 +267,10 @@ def api_sensitivity_rq(req: SimulationParams):
     child_seeds = ss.spawn(len(r_range) * len(q_range) * 2)
     
     idx = 0
+    max_profit = -float('inf')
+    optimal_r = None
+    optimal_q = None
+    
     for r in r_range:
         for q in q_range:
             rng_a = np.random.default_rng(child_seeds[idx])
@@ -276,14 +282,27 @@ def api_sensitivity_rq(req: SimulationParams):
                 n_days=req.n_days, warmup_days=req.warmup_days, rng_a=rng_a, rng_b=rng_b
             )
             kpis = summarise(df)
+            profit = clean_dict(kpis)["avg_profit"]
+            
+            if profit > max_profit:
+                max_profit = profit
+                optimal_r = r
+                optimal_q = q
             
             results.append({
                 "R": r,
                 "Q": q,
-                "profit": clean_dict(kpis)["avg_profit"]
+                "profit": profit
             })
             
-    return results
+    # Add optimal flag
+    for res in results:
+        res["is_optimal"] = (res["R"] == optimal_r and res["Q"] == optimal_q)
+        
+    return {
+        "optimal_rq": {"r": optimal_r, "q": optimal_q, "profit": max_profit},
+        "data": results
+    }
 
 if __name__ == "__main__":
     import uvicorn
