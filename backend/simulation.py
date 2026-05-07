@@ -27,8 +27,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm as _norm, ttest_ind as _ttest
 
-from backend.demand import build_demand_series
-from backend.inventory import AgeBucketInventory, PipelineQueue, simulate_one_day
+from demand import build_demand_series
+from inventory import AgeBucketInventory, PipelineQueue, simulate_one_day
 
 
 # ---------------------------------------------------------------------------

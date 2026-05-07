@@ -9,8 +9,8 @@ from pydantic import BaseModel, Field
 import numpy as np
 import pandas as pd
 
-from backend.config import BASE_PARAMS, GLOBAL_SEED, Q_A, Q_B, R_A, R_B, SIM_DAYS, WARMUP_DAYS, Q_VALUES, N_DAYS
-from backend.simulation import (
+from config import BASE_PARAMS, GLOBAL_SEED, Q_A, Q_B, R_A, R_B, SIM_DAYS, WARMUP_DAYS, Q_VALUES, N_DAYS
+from simulation import (
     run_multi_period_simulation,
     summarise,
     run_stress_test,
