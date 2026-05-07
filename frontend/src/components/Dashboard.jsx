@@ -93,32 +93,38 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
 
   const getColor = (val) => {
     const ratio = (val - minP) / (maxP - minP || 1);
-    if (ratio < 0.33) {
-      const rRatio = ratio / 0.33;
-      const r = Math.round(15 + rRatio * (13 - 15));
-      const g = Math.round(23 + rRatio * (148 - 23));
-      const b = Math.round(42 + rRatio * (136 - 42));
+    if (ratio < 0.25) {
+      const rRatio = ratio / 0.25;
+      const r = Math.round(10 + rRatio * (30 - 10));
+      const g = Math.round(15 + rRatio * (27 - 15));
+      const b = Math.round(36 + rRatio * (75 - 36));
       return `rgb(${r}, ${g}, ${b})`;
-    } else if (ratio < 0.66) {
-      const rRatio = (ratio - 0.33) / 0.33;
-      const r = Math.round(13 + rRatio * (6 - 13));
-      const g = Math.round(148 + rRatio * (182 - 148));
-      const b = Math.round(136 + rRatio * (212 - 136));
+    } else if (ratio < 0.5) {
+      const rRatio = (ratio - 0.25) / 0.25;
+      const r = Math.round(30 + rRatio * (15 - 30));
+      const g = Math.round(27 + rRatio * (118 - 27));
+      const b = Math.round(75 + rRatio * (110 - 75));
+      return `rgb(${r}, ${g}, ${b})`;
+    } else if (ratio < 0.75) {
+      const rRatio = (ratio - 0.5) / 0.25;
+      const r = Math.round(15 + rRatio * (6 - 15));
+      const g = Math.round(118 + rRatio * (182 - 118));
+      const b = Math.round(110 + rRatio * (212 - 110));
       return `rgb(${r}, ${g}, ${b})`;
     } else {
-      const rRatio = (ratio - 0.66) / 0.34;
-      const r = Math.round(6 + rRatio * (45 - 6));
-      const g = Math.round(182 + rRatio * (212 - 182));
-      const b = Math.round(212 + rRatio * (191 - 212));
+      const rRatio = (ratio - 0.75) / 0.25;
+      const r = Math.round(6 + rRatio * (16 - 6));
+      const g = Math.round(182 + rRatio * (185 - 182));
+      const b = Math.round(212 + rRatio * (129 - 212));
       return `rgb(${r}, ${g}, ${b})`;
     }
   };
 
   return (
     <div className="flex flex-col space-y-4">
-      <div className="flex items-center justify-between text-xs text-white/70 bg-black/20 p-2 rounded border-[1px] border-[rgba(255,255,255,0.03)]">
+      <div className="flex flex-col md:flex-row items-center justify-between text-xs text-white/70 bg-black/20 p-3 rounded border border-white/5 gap-4">
         <div className="flex items-center gap-2">
-          <span>Zoom:</span>
+          <span className="font-semibold">Zoom:</span>
           <input 
             type="range" min="30" max="80" step="5" 
             value={cellSize} 
@@ -126,7 +132,17 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
             className="w-24 accent-accent"
           />
         </div>
-        <div>Hover over cells for coordinates & delta.</div>
+        
+        <div className="flex flex-col flex-1 w-full max-w-[200px] gap-1">
+          <div className="flex justify-between text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+            <span>Lowest</span>
+            <span>Avg</span>
+            <span>Peak</span>
+          </div>
+          <div className="h-1.5 rounded-full w-full shadow-inner" style={{ background: 'linear-gradient(to right, #0a0f24, #1e1b4b, #0f766e, #06b6d4, #10b981)' }} />
+        </div>
+
+        <div className="text-[10px] text-slate-400">Hover for coords & delta</div>
       </div>
       
       <div className="overflow-auto custom-scrollbar border border-white/10 rounded max-h-[500px]">
@@ -139,11 +155,11 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
             padding: '1px'
           }}
         >
-          <div className="text-xs text-white/50 flex items-center justify-center p-2 sticky left-0 top-0 bg-[#0f172a] z-20 backdrop-blur-md">R \ Q</div>
+          <div className="text-xs text-slate-400 flex items-center justify-center p-2 sticky left-0 top-0 bg-[#0f172a] z-20 backdrop-blur-md">R \ Q</div>
           {qVals.map(q => (
             <div 
               key={`hq-${q}`} 
-              className={`text-[10px] text-white/80 font-semibold flex items-center justify-center sticky top-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverQ === q ? 'text-[#2dd4bf] bg-[rgba(6,182,212,0.15)]' : ''}`}
+              className={`text-[10px] font-semibold flex items-center justify-center sticky top-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverQ === q ? 'text-white bg-white/5' : 'text-slate-400'}`}
             >
               {q}
             </div>
@@ -152,14 +168,15 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
           {rVals.map(r => (
             <React.Fragment key={`row-${r}`}>
               <div 
-                className={`text-[10px] text-white/80 font-semibold flex items-center justify-center sticky left-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverR === r ? 'text-[#2dd4bf] bg-[rgba(6,182,212,0.15)]' : ''}`}
+                className={`text-[10px] font-semibold flex items-center justify-center sticky left-0 bg-[#0f172a] z-10 transition-colors backdrop-blur-md ${hoverR === r ? 'text-white bg-white/5' : 'text-slate-400'}`}
               >
                 {r}
               </div>
               {qVals.map(q => {
                 const cell = data.find(d => d.R === r && d.Q === q);
                 const isOpt = optimalRq && optimalRq.r === r && optimalRq.q === q;
-                const isHovered = hoverR === r || hoverQ === q;
+                const isHoveredRowOrCol = hoverR === r || hoverQ === q;
+                const isExactHovered = hoverR === r && hoverQ === q;
                 const profitDiff = cell ? (cell.profit - baselineProfit) : 0;
                 const diffStr = profitDiff > 0 ? `+${profitDiff.toFixed(0)}` : profitDiff.toFixed(0);
                 
@@ -172,14 +189,15 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
                     onMouseEnter={() => { setHoverR(r); setHoverQ(q); }}
                     onMouseLeave={() => { setHoverR(null); setHoverQ(null); }}
                     title={`R=${r}, Q=${q}\nProfit=${cell?.profit?.toFixed(2)} (Avg over 5 runs)\nDelta vs Current: ${diffStr} EGP`}
-                    className={`cursor-pointer transition-colors flex items-center justify-center text-[12px] relative
-                      border-[1px] border-[rgba(255,255,255,0.03)]
-                      ${isHovered ? 'bg-[rgba(6,182,212,0.15)] z-0 outline outline-1 outline-white/30' : ''}
-                      ${isOpt ? 'outline outline-2 outline-[#2dd4bf] z-10 shadow-[0_0_15px_rgba(6,182,212,0.4)] bg-[#2dd4bf]/20' : ''}
+                    className={`cursor-pointer transition-all duration-200 flex items-center justify-center text-[12px] relative
+                      border border-slate-800/50
+                      ${isHoveredRowOrCol && !isExactHovered ? 'brightness-125 z-0' : ''}
+                      ${isExactHovered ? 'ring-1 ring-white z-20 scale-110 shadow-lg' : ''}
+                      ${isOpt ? 'ring-2 ring-[#a3e635] z-10 shadow-[0_0_15px_rgba(163,230,53,0.4)]' : ''}
                     `}
                     style={{ 
                       height: `${cellSize}px`, 
-                      backgroundColor: cell && !isOpt && !isHovered ? getColor(cell.profit) : (cell && (isOpt || isHovered) ? undefined : 'transparent'),
+                      backgroundColor: cell ? getColor(cell.profit) : 'transparent',
                     }}
                   >
                     {isOpt && (
