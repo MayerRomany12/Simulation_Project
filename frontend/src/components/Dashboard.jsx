@@ -276,11 +276,11 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
   );
 };
 
-const TooltipLabel = ({ label, tooltip }) => (
+const TooltipLabel = ({ label, tooltip, align = "left" }) => (
   <div className="flex items-start gap-1 group relative mb-1">
     <label className="text-xs text-white/60 block flex-1 break-words leading-tight">{label}</label>
     <Info size={12} className="text-white/40 cursor-help mt-[2px] shrink-0" />
-    <div className="absolute bottom-full mb-2 left-0 w-48 p-2 bg-slate-800 text-xs text-white rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] border border-white/10 whitespace-normal break-words">
+    <div className={`absolute top-full mt-2 ${align === 'right' ? 'right-0' : 'left-0'} w-52 p-2 bg-slate-800 text-sm text-white rounded-md shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] border border-white/10 whitespace-normal break-words`}>
       {tooltip}
     </div>
   </div>
@@ -536,7 +536,7 @@ export default function Dashboard() {
                   <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
                 <div className="relative group">
-                  <TooltipLabel label="Standard Deviation (σ)" tooltip="Daily demand volatility. Cannot exceed Mean. (Min: 5, Max: 500)" />
+                  <TooltipLabel align="right" label="Standard Deviation (σ)" tooltip="Daily demand volatility. Cannot exceed Mean. (Min: 5, Max: 500)" />
                   <input type="number" name="sigma_a" value={params.sigma_a} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.sigma_a && <p className="text-red-400 text-xs mt-1">{errors.sigma_a}</p>}
                   <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
@@ -552,7 +552,7 @@ export default function Dashboard() {
                   <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
                 <div className="relative group">
-                  <TooltipLabel label="Reorder Point (R)" tooltip="Inventory level that triggers a new order." />
+                  <TooltipLabel align="right" label="Reorder Point (R)" tooltip="Inventory level that triggers a new order." />
                   <input type="number" name="R_a" value={params.R_a} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.R_a && <p className="text-red-400 text-xs mt-1">{errors.R_a}</p>}
                   <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
@@ -584,7 +584,7 @@ export default function Dashboard() {
                   <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
                 <div className="relative group">
-                  <TooltipLabel label="Expiry Limit (Days)" tooltip="Shelf life of the product." />
+                  <TooltipLabel align="right" label="Expiry Limit (Days)" tooltip="Shelf life of the product." />
                   <input type="number" name="expiry_k" value={params.expiry_k} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.expiry_k && <p className="text-red-400 text-xs mt-1">{errors.expiry_k}</p>}
                   <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
@@ -600,7 +600,7 @@ export default function Dashboard() {
                   <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
                 <div className="relative group">
-                  <TooltipLabel label="Unit Cost" tooltip="Wholesale cost per unit (EGP)." />
+                  <TooltipLabel align="right" label="Unit Cost" tooltip="Wholesale cost per unit (EGP)." />
                   <input type="number" name="c" value={params.c} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.c && <p className="text-red-400 text-xs mt-1">{errors.c}</p>}
                   <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
