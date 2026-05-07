@@ -280,7 +280,7 @@ const TooltipLabel = ({ label, tooltip, align = "left" }) => (
   <div className="flex items-start gap-1 group relative mb-1">
     <label className="text-xs text-white/60 block flex-1 break-words leading-tight">{label}</label>
     <Info size={12} className="text-white/40 cursor-help mt-[2px] shrink-0" />
-    <div className={`absolute top-full mt-2 ${align === 'right' ? 'right-0' : 'left-0'} w-52 p-2 bg-slate-800 text-sm text-white rounded-md shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] border border-white/10 whitespace-normal break-words`}>
+    <div className={`absolute bottom-full mb-2 ${align === 'right' ? 'right-0' : 'left-0'} w-52 p-2 bg-slate-800 text-sm text-white rounded-md shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] border border-white/10 whitespace-normal break-words`}>
       {tooltip}
     </div>
   </div>
@@ -516,7 +516,7 @@ export default function Dashboard() {
               </motion.button>
             </div>
 
-            <div className="space-y-4 max-h-[75vh] overflow-y-auto overflow-x-hidden pb-2 pr-2 custom-scrollbar">
+            <div className="space-y-4 pb-2 overflow-visible">
               <h3 className="text-sm text-primary font-semibold uppercase tracking-wider">Simulation Setting</h3>
               <div className="grid grid-cols-1 gap-4 mb-4">
                 <div className="relative group">
