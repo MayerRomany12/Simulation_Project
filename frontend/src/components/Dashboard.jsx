@@ -25,26 +25,47 @@ const CountUp = ({ value, suffix = '', decimals = 0 }) => {
   return <span ref={ref}>{(0).toFixed(decimals)}{suffix}</span>;
 };
 
-/* ── KPI card with neon hover glow ── */
-const KPICard = ({ title, rawValue, suffix = '', decimals = 0, icon: Icon, colorClass }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    whileHover={{ scale: 1.03, boxShadow: '0 0 22px rgba(56,189,248,0.45)' }}
-    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-    className="glass-panel p-6 flex items-center space-x-4"
-  >
-    <div className={`p-3 rounded-full bg-black/20 ${colorClass}`}>
-      <Icon size={24} />
-    </div>
-    <div>
-      <h3 className="text-sm font-medium text-white/60">{title}</h3>
-      <p className="text-2xl font-bold text-white">
-        <CountUp value={rawValue} suffix={suffix} decimals={decimals} />
-      </p>
-    </div>
-  </motion.div>
-);
+/* ── KPI card with neon hover glow and pulse ── */
+const KPICard = ({ title, rawValue, suffix = '', decimals = 0, icon: Icon, colorClass }) => {
+  const [prevValue, setPrevValue] = useState(rawValue);
+  const [flash, setFlash] = useState(false);
+
+  useEffect(() => {
+    if (rawValue !== undefined && prevValue !== undefined && rawValue > prevValue) {
+      setFlash(true);
+      const t = setTimeout(() => setFlash(false), 1000);
+      return () => clearTimeout(t);
+    }
+    if (rawValue !== undefined) {
+      setPrevValue(rawValue);
+    }
+  }, [rawValue, prevValue]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ 
+        opacity: 1, 
+        y: 0, 
+        boxShadow: flash ? '0 0 30px rgba(34, 197, 94, 0.6)' : '0 0 0px rgba(0,0,0,0)',
+        borderColor: flash ? 'rgba(34, 197, 94, 0.8)' : 'rgba(255,255,255,0.1)'
+      }}
+      whileHover={{ scale: 1.03, boxShadow: '0 0 22px rgba(56,189,248,0.45)' }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      className={`glass-panel p-6 flex items-center space-x-4 border ${flash ? 'border-green-500' : 'border-white/10'} transition-colors duration-300`}
+    >
+      <div className={`p-3 rounded-full bg-black/20 ${colorClass}`}>
+        <Icon size={24} />
+      </div>
+      <div>
+        <h3 className="text-sm font-medium text-white/60">{title}</h3>
+        <p className="text-2xl font-bold text-white">
+          <CountUp value={rawValue} suffix={suffix} decimals={decimals} />
+        </p>
+      </div>
+    </motion.div>
+  );
+};
 
 const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
   const [cellSize, setCellSize] = useState(40);
@@ -162,9 +183,9 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
                   >
                     {isOpt && (
                       <motion.span 
-                        animate={{ scale: [1, 1.1, 1] }} 
-                        transition={{ repeat: Infinity, duration: 2 }}
-                        className="drop-shadow-[0_0_8px_rgba(45,212,191,0.8)] inline-block"
+                        animate={{ scale: [1, 1.15, 1] }} 
+                        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                        className="drop-shadow-[0_0_12px_rgba(45,212,191,0.9)] inline-block"
                       >
                         ⭐
                       </motion.span>
@@ -182,13 +203,15 @@ const Heatmap = ({ data, optimalRq, currentR, currentQ, onApply }) => {
           <div className="text-white/80">
             <span className="text-[#06b6d4] font-bold">🎯 Strategic Sweet Spot:</span> Achieving the perfect balance at <strong>R={optimalRq.r}</strong> and <strong>Q={optimalRq.q}</strong> can boost your stability by <strong className="text-white">{boostPct}%</strong>.
           </div>
-          <button 
+          <motion.button 
             type="button"
+            whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(6,182,212,0.6)' }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => onApply && onApply(optimalRq.r, optimalRq.q)}
-            className="px-4 py-2 bg-gradient-to-r from-[#0d9488] to-[#06b6d4] hover:from-[#0f766e] hover:to-[#0891b2] text-white font-bold rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all shrink-0"
+            className="px-4 py-2 bg-gradient-to-r from-[#0d9488] to-[#06b6d4] hover:from-[#0f766e] hover:to-[#0891b2] text-white font-bold rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-colors shrink-0"
           >
             Apply Optimal Settings
-          </button>
+          </motion.button>
         </div>
       )}
     </div>
@@ -396,8 +419,9 @@ export default function Dashboard() {
   // Spotlight on glass panels
   const handleMouseMove = null; // disabled
 
-  const page = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
-  const item = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } };
+  const page = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
+  const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } } };
+  const sidebarItem = { hidden: { opacity: 0, x: -50 }, show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } } };
   const tab = { hidden: { opacity: 0, x: 20 }, show: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -20 } };
 
   return (
@@ -422,53 +446,58 @@ export default function Dashboard() {
 
       <motion.div variants={page} initial="hidden" animate="show" className="flex flex-col lg:flex-row gap-12 relative p-4 lg:p-6">
         {/* Sidebar */}
-        <motion.div variants={item} className="w-full lg:w-80 shrink-0">
+        <motion.div variants={sidebarItem} className="w-full lg:w-80 shrink-0">
           <form onSubmit={handleSubmit} className="glass-panel p-6 sticky top-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <Settings className="text-primary" />
                 <h2 className="text-xl font-bold text-white">Parameters</h2>
               </div>
-              <button type="button" onClick={handleExportPDF} title="Download Report" className="p-2 rounded hover:bg-white/10 text-white/70 transition">
+              <motion.button whileHover={{ scale: 1.1, textShadow: "0px 0px 8px rgb(255,255,255)" }} whileTap={{ scale: 0.9 }} type="button" onClick={handleExportPDF} title="Download Report" className="p-2 rounded hover:bg-white/10 text-white/70 transition">
                 <Download size={18} />
-              </button>
+              </motion.button>
             </div>
 
             <div className="space-y-4 max-h-[75vh] overflow-y-auto overflow-x-hidden pb-2 pr-2 custom-scrollbar">
               <h3 className="text-sm text-primary font-semibold uppercase tracking-wider">Simulation Setting</h3>
               <div className="grid grid-cols-1 gap-4 mb-4">
-                <div>
+                <div className="relative group">
                   <TooltipLabel label="Simulation Horizon (Days)" tooltip="Number of days to simulate." />
-                  <input type="number" name="n_days" min="100" max="30000" value={params.n_days} onChange={handleParamChange} className="glass-input w-full" />
+                  <input type="number" name="n_days" min="100" max="30000" value={params.n_days} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.n_days && <p className="text-red-400 text-xs mt-1">{errors.n_days}</p>}
+                  <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
               </div>
 
               <h3 className="text-sm text-primary font-semibold uppercase tracking-wider">Demand (Product A)</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="relative group">
                   <TooltipLabel label="Mean Daily Demand (μ)" tooltip="Average number of units sold per day. (Min: 5, Max: 500)" />
-                  <input type="number" name="mu_a" value={params.mu_a} onChange={handleParamChange} className="glass-input w-full" />
+                  <input type="number" name="mu_a" value={params.mu_a} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.mu_a && <p className="text-red-400 text-xs mt-1">{errors.mu_a}</p>}
+                  <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
-                <div>
+                <div className="relative group">
                   <TooltipLabel label="Standard Deviation (σ)" tooltip="Daily demand volatility. Cannot exceed Mean. (Min: 5, Max: 500)" />
-                  <input type="number" name="sigma_a" value={params.sigma_a} onChange={handleParamChange} className="glass-input w-full" />
+                  <input type="number" name="sigma_a" value={params.sigma_a} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.sigma_a && <p className="text-red-400 text-xs mt-1">{errors.sigma_a}</p>}
+                  <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
               </div>
 
               <h3 className="text-sm text-primary font-semibold uppercase tracking-wider mt-6">Inventory Policy (A)</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="relative group">
                   <TooltipLabel label="Order Quantity (Q)" tooltip="Number of units ordered when inventory drops." />
-                  <input type="number" name="Q_a" value={params.Q_a} onChange={handleParamChange} className="glass-input w-full" />
+                  <input type="number" name="Q_a" value={params.Q_a} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.Q_a && <p className="text-red-400 text-xs mt-1">{errors.Q_a}</p>}
+                  <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
-                <div>
+                <div className="relative group">
                   <TooltipLabel label="Reorder Point (R)" tooltip="Inventory level that triggers a new order." />
-                  <input type="number" name="R_a" value={params.R_a} onChange={handleParamChange} className="glass-input w-full" />
+                  <input type="number" name="R_a" value={params.R_a} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.R_a && <p className="text-red-400 text-xs mt-1">{errors.R_a}</p>}
+                  <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
               </div>
 
@@ -490,29 +519,33 @@ export default function Dashboard() {
 
               <h3 className="text-sm text-primary font-semibold uppercase tracking-wider mt-6">Supply & Constraints</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="relative group">
                   <TooltipLabel label="Lead Time (Days)" tooltip="Days between order placement and receipt." />
-                  <input type="number" name="lead_time" value={params.lead_time} onChange={handleParamChange} className="glass-input w-full" />
+                  <input type="number" name="lead_time" value={params.lead_time} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.lead_time && <p className="text-red-400 text-xs mt-1">{errors.lead_time}</p>}
+                  <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
-                <div>
+                <div className="relative group">
                   <TooltipLabel label="Expiry Limit (Days)" tooltip="Shelf life of the product." />
-                  <input type="number" name="expiry_k" value={params.expiry_k} onChange={handleParamChange} className="glass-input w-full" />
+                  <input type="number" name="expiry_k" value={params.expiry_k} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.expiry_k && <p className="text-red-400 text-xs mt-1">{errors.expiry_k}</p>}
+                  <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
               </div>
 
               <h3 className="text-sm text-primary font-semibold uppercase tracking-wider mt-6">Economics (EGP)</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="relative group">
                   <TooltipLabel label="Selling Price" tooltip="Retail selling price per unit (EGP)." />
-                  <input type="number" name="p" value={params.p} onChange={handleParamChange} className="glass-input w-full" />
+                  <input type="number" name="p" value={params.p} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.p && <p className="text-red-400 text-xs mt-1">{errors.p}</p>}
+                  <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
-                <div>
+                <div className="relative group">
                   <TooltipLabel label="Unit Cost" tooltip="Wholesale cost per unit (EGP)." />
-                  <input type="number" name="c" value={params.c} onChange={handleParamChange} className="glass-input w-full" />
+                  <input type="number" name="c" value={params.c} onChange={handleParamChange} className="glass-input w-full transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary/50" />
                   {errors.c && <p className="text-red-400 text-xs mt-1">{errors.c}</p>}
+                  <div className="absolute inset-0 rounded pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 ring-1 ring-primary/30" />
                 </div>
               </div>
             </div>
@@ -523,10 +556,16 @@ export default function Dashboard() {
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="glass-button w-full mt-6 flex items-center justify-center gap-2 font-bold py-3">
+            <motion.button 
+              type="submit" 
+              disabled={loading} 
+              whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(56,189,248,0.5)' }}
+              whileTap={{ scale: 0.95 }}
+              className="glass-button w-full mt-6 flex items-center justify-center gap-2 font-bold py-3 transition-colors"
+            >
               {loading ? <RefreshCw className="animate-spin" size={18} /> : <Activity size={18} />}
               {loading ? 'Running 5 Scenarios...' : 'Run Simulation'}
-            </button>
+            </motion.button>
           </form>
         </motion.div>
 
@@ -658,8 +697,8 @@ export default function Dashboard() {
                                   itemStyle={{ color: '#fff' }}
                                 />
                                 <Legend />
-                                <Area type="stepAfter" dataKey="inv_end_a" name="Inv A" stroke="#38bdf8" fillOpacity={1} fill="url(#colorInvA)" animationDuration={0} />
-                                <Area type="stepAfter" dataKey="inv_end_b" name="Inv B" stroke="#f472b6" fillOpacity={1} fill="url(#colorInvB)" animationDuration={0} />
+                                <Area type="stepAfter" dataKey="inv_end_a" name="Inv A" stroke="#38bdf8" fillOpacity={1} fill="url(#colorInvA)" isAnimationActive={true} animationDuration={1500} animationEasing="ease-in-out" />
+                                <Area type="stepAfter" dataKey="inv_end_b" name="Inv B" stroke="#f472b6" fillOpacity={1} fill="url(#colorInvB)" isAnimationActive={true} animationDuration={1500} animationEasing="ease-in-out" />
                               </AreaChart>
                             </ResponsiveContainer>
                           )}
@@ -687,7 +726,7 @@ export default function Dashboard() {
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                                     formatter={(value) => [Number(value).toFixed(2), "Simulated Profit (Avg over 5 runs)"]}
                                   />
-                                  <Bar dataKey="sim_profit" name="Simulated Profit" radius={[4, 4, 0, 0]}>
+                                  <Bar dataKey="sim_profit" name="Simulated Profit" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" animationBegin={200}>
                                     {qData.data.map((entry, index) => (
                                       <Cell key={`cell-${index}`} fill={entry.is_optimal ? '#10b981' : '#818cf8'} />
                                     ))}
